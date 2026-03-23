@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#007AFF">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Hamro Esports | Tournament Arena</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Firebase Compat CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, 'SF Pro Display', BlinkMacSystemFont, sans-serif;
+            background: #f2f2f7;
+            transition: background 0.3s ease;
+            padding-bottom: 80px;
+        }
+        
+        body.dark {
+            background: #000000;
+        }
+        
+        /* iOS-style cards */
+        .ios-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+        }
+        
+        body.dark .ios-card {
+            background: #1c1c1e;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+        }
+        
+        /* iOS-style buttons */
+        .ios-btn {
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .ios-btn-primary {
+            background: #007AFF;
+            color: white;
+        }
+        
+        .ios-btn-primary:active {
+            transform: scale(0.98);
+            background: #0051d5;
+        }
+        
+        /* Input styles */
+        .ios-input {
+            border-radius: 10px;
+            border: 1px solid #e5e5ea;
+            padding: 12px 16px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        body.dark .ios-input {
+            background: #2c2c2e;
+            border-color: #3a3a3c;
+            color: white;
+        }
+        
+        .ios-input:focus {
+            outline: none;
+            border-color: #007AFF;
+            box-shadow: 0 0 0 3px rgba(0,122,255,0.1);
+        }
+        
+        /* Bottom sheet */
+        .bottom-sheet {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            transition: bottom 0.3s ease;
+            z-index: 1000;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        body.dark .bottom-sheet {
+            background: #1c1c1e;
+        }
+        
+        .bottom-sheet.active {
+            bottom: 0;
+        }
+        
+        /* Slot selection */
+        .slot-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: #f2f2f7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        body.dark .slot-btn {
+            background: #2c2c2e;
+            color: white;
+        }
+        
+        .slot-btn.selected {
+            background: #007AFF;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .slot-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Hold to confirm button */
+        .hold-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.1s linear;
+        }
+        
+        .hold-btn.progress {
+            background: linear-gradient(90deg, #34C759 0%, #34C759 var(--progress), #e5e5ea var(--progress));
+        }
+        
+        /* Animation */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+        
+        /* Rank badges */
+        .rank-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+        }
+        
+        .rank-bronze { background: linear-gradient(135deg, #cd7f32, #b87333); color: white; }
+        .rank-silver { background: linear-gradient(135deg, #c0c0c0, #a0a0a0); color: white; }
+        .rank-gold { background: linear-gradient(135deg, #ffd700, #f4c542); color: white; }
+        .rank-platinum { background: linear-gradient(135deg, #e5e4e2, #b0c4de); color: #2c3e50; }
+        .rank-diamond { background: linear-gradient(135deg, #b9f2ff, #4ecdc4); color: #1e3c72; }
+        
+        /* Progress bar */
+        .progress-bar {
+            height: 8px;
+            background: #e5e5ea;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #007AFF;
+            transition: width 0.3s ease;
+        }
+        
+        /* Confetti canvas */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0,122,255,0.2);
+            border-top-color: #007AFF;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #007AFF;
+            border-radius: 2px;
+        }
+        
+        /* Hide scrollbar for mobile */
+        @media (max-width: 768px) {
+            ::-webkit-scrollbar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="font-sans antialiased">
+    <canvas id="confetti-canvas"></canvas>
+    
+    <div id="app" class="max-w-md mx-auto px-4">
+        <!-- Header -->
+        <div class="sticky top-0 z-50 bg-[#f2f2f7] dark:bg-black pt-3 pb-2 transition-colors duration-300">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 bg-gradient-to-r from-[#007AFF] to-[#AF52DE] rounded-xl flex items-center justify-center">
+                        <span class="text-white font-bold text-xl">🏆</span>
+                    </div>
+                    <div>
+                        <h1 class="font-extrabold text-xl">Hamro Esports</h1>
+                        <p class="text-xs text-[#8e8e93]">Tournament Arena</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div id="wallet-badge" class="bg-[#34C759] px-3 py-1 rounded-full text-white text-sm font-semibold">
+                        ₹0
+                    </div>
+                    <button id="darkModeToggle" class="w-8 h-8 rounded-full bg-white dark:bg-[#1c1c1e] shadow-md flex items-center justify-center">
+                        🌙
+                    </button>
+                    <button id="notificationBell" class="relative w-8 h-8 rounded-full bg-white dark:bg-[#1c1c1e] shadow-md flex items-center justify-center">
+                        🔔
+                        <span id="notificationBadge" class="absolute -top-1 -right-1 bg-[#FF3B30] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center hidden">0</span>
+                    </button>
+                    <div id="userAvatar" class="w-8 h-8 rounded-full bg-gradient-to-r from-[#007AFF] to-[#AF52DE] flex items-center justify-center text-white font-bold cursor-pointer">
+                        👤
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content Area -->
+        <div id="content-area" class="mt-4">
+            <!-- Dynamic content loads here -->
+        </div>
+    </div>
+    
+    <!-- Bottom Navigation -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-black/90 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800 py-2 z-50">
+        <div class="max-w-md mx-auto flex justify-around">
+            <button class="nav-btn flex flex-col items-center gap-1 text-[#8e8e93] transition-colors" data-tab="home">
+                <i class="text-xl">🏠</i>
+                <span class="text-xs font-medium">Home</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center gap-1 text-[#8e8e93] transition-colors" data-tab="matches">
+                <i class="text-xl">⚔️</i>
+                <span class="text-xs font-medium">Matches</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center gap-1 text-[#8e8e93] transition-colors" data-tab="play">
+                <i class="text-xl">🏆</i>
+                <span class="text-xs font-medium">Play</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center gap-1 text-[#8e8e93] transition-colors" data-tab="wallet">
+                <i class="text-xl">💰</i>
+                <span class="text-xs font-medium">Wallet</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center gap-1 text-[#8e8e93] transition-colors" data-tab="profile">
+                <i class="text-xl">👤</i>
+                <span class="text-xs font-medium">Profile</span>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Bottom Sheet Modals -->
+    <div id="joinSheet" class="bottom-sheet">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Join Tournament</h3>
+                <button onclick="closeSheet()" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800">✕</button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-sm font-medium mb-1 block">Free Fire UID</label>
+                    <input type="text" id="uidInput" class="ios-input w-full" placeholder="Enter 9-12 digit UID" maxlength="12" pattern="[0-9]{9,12}">
+                </div>
+                <div>
+                    <label class="text-sm font-medium mb-2 block">Select Slot</label>
+                    <div id="slotGrid" class="grid grid-cols-4 gap-3"></div>
+                </div>
+                <button id="holdConfirmBtn" class="hold-btn ios-btn ios-btn-primary w-full py-3 relative overflow-hidden">Hold to Confirm (3s)</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="lobbySheet" class="bottom-sheet">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Match Lobby</h3>
+                <button onclick="closeSheet()" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800">✕</button>
+            </div>
+            <div class="space-y-4">
+                <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-xl">
+                    <div class="text-sm text-gray-500">Room ID</div>
+                    <div class="flex justify-between items-center">
+                        <code id="roomId" class="font-mono text-lg">Loading...</code>
+                        <button onclick="copyToClipboard('roomId')" class="text-[#007AFF]">📋 Copy</button>
+                    </div>
+                    <div class="text-sm text-gray-500 mt-2">Password</div>
+                    <code id="roomPassword" class="font-mono">Loading...</code>
+                </div>
+                <div>
+                    <div class="text-sm font-medium mb-2">Players (0/16)</div>
+                    <div id="playersGrid" class="grid grid-cols-4 gap-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="resultSheet" class="bottom-sheet">
+        <div class="p-6 text-center">
+            <div id="podium" class="mb-6"></div>
+            <div id="resultDetails" class="space-y-2"></div>
+            <div class="flex gap-2 mt-4">
+                <button onclick="shareResult('whatsapp')" class="flex-1 ios-btn bg-green-500 text-white py-2">📱 WhatsApp</button>
+                <button onclick="shareResultImage()" class="flex-1 ios-btn bg-[#007AFF] text-white py-2">📸 Share Image</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="notificationSheet" class="bottom-sheet">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Notifications</h3>
+                <button onclick="closeSheet()" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800">✕</button>
+            </div>
+            <div id="notificationsList" class="space-y-3 max-h-96 overflow-y-auto"></div>
+            <button id="markAllRead" class="mt-4 text-[#007AFF] text-sm">Mark all as read</button>
+        </div>
+    </div>
+    
+    <div id="supportSheet" class="bottom-sheet">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Support Ticket</h3>
+                <button onclick="closeSheet()" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800">✕</button>
+            </div>
+            <form id="ticketForm" class="space-y-4">
+                <input type="text" id="ticketSubject" placeholder="Subject" class="ios-input w-full" required>
+                <textarea id="ticketMessage" rows="4" placeholder="Describe your issue..." class="ios-input w-full" required></textarea>
+                <button type="submit" class="ios-btn ios-btn-primary w-full py-3">Submit Ticket</button>
+            </form>
+            <div id="ticketHistory" class="mt-6 space-y-3 max-h-64 overflow-y-auto"></div>
+        </div>
+    </div>
+    
+    <div id="reportSheet" class="bottom-sheet">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Report Player</h3>
+                <button onclick="closeSheet()" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800">✕</button>
+            </div>
+            <form id="reportForm" class="space-y-4">
+                <input type="text" id="reportedUid" placeholder="Player UID" class="ios-input w-full" required>
+                <select id="reportReason" class="ios-input w-full" required>
+                    <option value="">Select reason</option>
+                    <option value="cheating">Cheating/Hacking</option>
+                    <option value="toxic">Toxic Behavior</option>
+                    <option value="afk">AFK/Leaving</option>
+                    <option value="teaming">Team Killing</option>
+                </select>
+                <textarea id="reportDescription" rows="3" placeholder="Additional details..." class="ios-input w-full"></textarea>
+                <button type="submit" class="ios-btn ios-btn-primary w-full py-3">Submit Report</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration - REPLACE WITH YOUR ACTUAL CONFIG
+        const firebaseConfig = {
+  apiKey: "AIzaSyAPEWF1t1YKFG2-hrzY7IWBaumM4xyLwOs",
+  authDomain: "hamro-tournament-09.firebaseapp.com",
+  databaseURL: "https://hamro-tournament-09-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "hamro-tournament-09",
+  storageBucket: "hamro-tournament-09.firebasestorage.app",
+  messagingSenderId: "167377472023",
+  appId: "1:167377472023:web:ef825e192f564c5ccdea52"
+};
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        // App State
+        let currentUser = null;
+        let currentTab = 'home';
+        let currentTournament = null;
+        let selectedSlot = null;
+        let holdTimeout = null;
+        let holdProgress = 0;
+        
+        // DOM Elements
+        const contentArea = document.getElementById('content-area');
+        const walletBadge = document.getElementById('wallet-badge');
+        
+        // Confetti System
+        class ConfettiSystem {
+            constructor() {
+                this.canvas = document.getElementById('confetti-canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.particles = [];
+                this.animation = null;
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+            }
+            
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+            
+            burst() {
+                this.particles = [];
+                for (let i = 0; i < 150; i++) {
+                    this.particles.push({
+                        x: this.canvas.width / 2,
+                        y: this.canvas.height / 2,
+                        vx: (Math.random() - 0.5) * 15,
+                        vy: (Math.random() - 0.5) * 15 - 8,
+                        size: Math.random() * 6 + 2,
+                        color: `hsl(${Math.random() * 360}, 70%, 60%)`,
+                        life: 1
+                    });
+                }
+                this.animate();
+                setTimeout(() => this.clear(), 2000);
+            }
+            
+            animate() {
+                if (this.animation) cancelAnimationFrame(this.animation);
+                const animateFrame = () => {
+                    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                    let alive = false;
+                    this.particles.forEach(p => {
+                        if (p.life > 0) {
+                            alive = true;
+                            p.x += p.vx;
+                            p.y += p.vy;
+                            p.vy += 0.3;
+                            p.life -= 0.02;
+                            this.ctx.fillStyle = p.color;
+                            this.ctx.fillRect(p.x, p.y, p.size, p.size);
+                        }
+                    });
+                    if (alive) {
+                        this.animation = requestAnimationFrame(animateFrame);
+                    } else {
+                        this.animation = null;
+                    }
+                };
+                animateFrame();
+            }
+            
+            clear() {
+                if (this.animation) {
+                    cancelAnimationFrame(this.animation);
+                    this.animation = null;
+                }
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+        }
+        
+        const confetti = new ConfettiSystem();
+        
+        // Helper Functions
+        function showLoading() {
+            contentArea.innerHTML = '<div class="flex justify-center py-20"><div class="spinner"></div></div>';
+        }
+        
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-20 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-lg text-white z-50 animate-bounce ${type === 'error' ? 'bg-red-500' : 'bg-green-500'}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+        
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text);
+            showToast('Copied to clipboard!');
+        }
+        
+        function closeSheet() {
+            document.querySelectorAll('.bottom-sheet').forEach(sheet => {
+                sheet.classList.remove('active');
+            });
+            if (holdTimeout) clearTimeout(holdTimeout);
+            const holdBtn = document.getElementById('holdConfirmBtn');
+            if (holdBtn) holdBtn.style.setProperty('--progress', '0%');
+        }
+        
+        // Dark Mode
+        function initDarkMode() {
+            const saved = localStorage.getItem('darkMode');
+            const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const isDark = saved === 'true' || (saved === null && systemDark);
+            if (isDark) document.body.classList.add('dark');
+            document.getElementById('darkModeToggle').onclick = () => {
+                document.body.classList.toggle('dark');
+                localStorage.setItem('darkMode', document.body.classList.contains('dark'));
+            };
+        }
+        
+        // Auth Check
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (!userDoc.exists) {
+                    await db.collection('users').doc(user.uid).set({
+                        uid: user.uid,
+                        email: user.email,
+                        username: user.email.split('@')[0],
+                        wallet: 500,
+                        rank: 'Bronze',
+                        xp: 0,
+                        badges: ['welcome'],
+                        banned: false,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } else if (userDoc.data().banned) {
+                    await auth.signOut();
+                    showToast('Account banned', 'error');
+                    return;
+                }
+                loadUserData();
+                loadTab(currentTab);
+            } else {
+                currentUser = null;
+                showAuthScreen();
+            }
+        });
+        
+        async function loadUserData() {
+            const doc = await db.collection('users').doc(currentUser.uid).get();
+            if (doc.exists) {
+                const data = doc.data();
+                walletBadge.textContent = `₹${data.wallet || 0}`;
+            }
+        }
+        
+        function showAuthScreen() {
+            contentArea.innerHTML = `
+                <div class="ios-card p-6 space-y-6">
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-gradient-to-r from-[#007AFF] to-[#AF52DE] rounded-2xl flex items-center justify-center mx-auto mb-3">
+                            <span class="text-4xl">🏆</span>
+                        </div>
+                        <h2 class="text-2xl font-extrabold">Welcome to Hamro Esports</h2>
+                        <p class="text-[#8e8e93] mt-1">Join tournaments & win prizes</p>
+                    </div>
+                    
+                    <form id="loginForm" class="space-y-4">
+                        <input type="email" id="loginEmail" placeholder="Email" class="ios-input w-full" required>
+                        <input type="password" id="loginPassword" placeholder="Password" class="ios-input w-full" required>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" id="rememberMe"> <span class="text-sm">Remember Me</span>
+                        </label>
+                        <button type="submit" class="ios-btn ios-btn-primary w-full py-3">Sign In</button>
+                        <button type="button" onclick="showSignUp()" class="w-full text-[#007AFF]">Create Account</button>
+                    </form>
+                </div>
+            `;
+            
+            document.getElementById('loginForm').onsubmit = async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                try {
+                    await auth.signInWithEmailAndPassword(email, password);
+                    showToast('Welcome back!');
+                } catch (error) {
+                    document.getElementById('loginForm').classList.add('shake');
+                    setTimeout(() => document.getElementById('loginForm').classList.remove('shake'), 300);
+                    showToast(error.message, 'error');
+                }
+            };
+        }
+        
+        window.showSignUp = () => {
+            contentArea.innerHTML = `
+                <div class="ios-card p-6 space-y-6">
+                    <h2 class="text-2xl font-extrabold text-center">Create Account</h2>
+                    <form id="signupForm" class="space-y-4">
+                        <input type="text" id="signupUsername" placeholder="Username" class="ios-input w-full" required>
+                        <input type="email" id="signupEmail" placeholder="Email" class="ios-input w-full" required>
+                        <input type="password" id="signupPassword" placeholder="Password" class="ios-input w-full" required>
+                        <div class="h-1 bg-gray-200 rounded-full overflow-hidden">
+                            <div id="passwordStrength" class="h-full w-0 transition-all"></div>
+                        </div>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" id="termsCheckbox" required> <span class="text-sm">I agree to Terms & Conditions</span>
+                        </label>
+                        <button type="submit" class="ios-btn ios-btn-primary w-full py-3">Sign Up</button>
+                        <button type="button" onclick="showAuthScreen()" class="w-full text-[#007AFF]">Back to Login</button>
+                    </form>
+                </div>
+            `;
+            
+            const passwordInput = document.getElementById('signupPassword');
+            passwordInput.oninput = () => {
+                const strength = Math.min(passwordInput.value.length / 8, 1);
+                const bar = document.getElementById('passwordStrength');
+                bar.style.width = `${strength * 100}%`;
+                bar.style.background = strength < 0.3 ? '#FF3B30' : strength < 0.6 ? '#FF9500' : '#34C759';
+            };
+            
+            document.getElementById('signupForm').onsubmit = async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('signupEmail').value;
+                const password = document.getElementById('signupPassword').value;
+                const username = document.getElementById('signupUsername').value;
+                const terms = document.getElementById('termsCheckbox').checked;
+                
+                if (!terms) {
+                    showToast('Please accept terms', 'error');
+                    return;
+                }
+                
+                try {
+                    const cred = await auth.createUserWithEmailAndPassword(email, password);
+                    await db.collection('users').doc(cred.user.uid).set({
+                        uid: cred.user.uid,
+                        email: email,
+                        username: username,
+                        wallet: 100,
+                        rank: 'Bronze',
+                        xp: 0,
+                        badges: ['welcome'],
+                        banned: false,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    showToast('Account created! Welcome bonus ₹100');
+                } catch (error) {
+                    showToast(error.message, 'error');
+                }
+            };
+        };
+        
+        // Tournament Card Generation
+        async function loadHome() {
+            showLoading();
+            const tournaments = await db.collection('tournaments').where('status', 'in', ['upcoming', 'live']).limit(10).get();
+            
+            let html = `
+                <div class="ios-card p-4 mb-4 bg-gradient-to-r from-[#007AFF] to-[#AF52DE] text-white">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold">Weekly Championship</h3>
+                            <p class="text-sm opacity-90">₹10,000 Prize Pool</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold">🔥</div>
+                            <p class="text-xs">Live Now</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3 mb-4 overflow-hidden">
+                    <marquee class="text-sm font-medium">🏆 New Tournament Added! 🎮 Free Fire Championship starting soon! 💰 Prize Pool ₹50,000 🔥 Limited Slots Available!</marquee>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="ios-card p-3 text-center">
+                        <div class="text-2xl font-bold text-[#34C759]" id="statWallet">₹0</div>
+                        <div class="text-xs text-[#8e8e93]">Wallet Balance</div>
+                    </div>
+                    <div class="ios-card p-3 text-center">
+                        <div class="text-2xl font-bold text-[#007AFF]" id="statMatches">0</div>
+                        <div class="text-xs text-[#8e8e93]">Matches Played</div>
+                    </div>
+                    <div class="ios-card p-3 text-center">
+                        <div class="text-2xl font-bold text-[#FFD700]" id="statWins">0</div>
+                        <div class="text-xs text-[#8e8e93]">Tournaments Won</div>
+                    </div>
+                    <div class="ios-card p-3 text-center rank-badge rank-bronze mx-auto">
+                        <span class="text-sm font-bold">Bronze</span>
+                    </div>
+                </div>
+                
+                <div class="flex gap-2 mb-4 overflow-x-auto pb-2">
+                    <button class="filter-btn px-4 py-2 rounded-full bg-[#007AFF] text-white text-sm font-medium" data-filter="all">All</button>
+                    <button class="filter-btn px-4 py-2 rounded-full bg-gray-200 dark:bg-gray-800 text-sm font-medium" data-filter="upcoming">Upcoming</button>
+                    <button class="filter-btn px-4 py-2 rounded-full bg-gray-200 dark:bg-gray-800 text-sm font-medium" data-filter="live">Live</button>
+                    <button class="filter-btn px-4 py-2 rounded-full bg-gray-200 dark:bg-gray-800 text-sm font-medium" data-filter="freefire">Free Fire</button>
+                </div>
+                
+                <div id="tournamentsList" class="space-y-3"></div>
+            `;
+            
+            contentArea.innerHTML = html;
+            
+            // Update stats
+            const userDoc = await db.collection('users').doc(currentUser.uid).get();
+            const matches = await db.collection('participants').where('userId', '==', currentUser.uid).get();
+            const wins = await db.collection('participants').where('userId', '==', currentUser.uid).where('won', '==', true).get();
+            
+            document.getElementById('statWallet').textContent = `₹${userDoc.data()?.wallet || 0}`;
+            document.getElementById('statMatches').textContent = matches.size;
+            document.getElementById('statWins').textContent = wins.size;
+            
+            // Render tournaments
+            const list = document.getElementById('tournamentsList');
+            tournaments.forEach(doc => {
+                const t = doc.data();
+                const endTime = t.matchTime?.toDate() || new Date();
+                list.innerHTML += `
+                    <div class="ios-card p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h3 class="font-bold text-lg">${t.title}</h3>
+                                <p class="text-sm text-[#8e8e93]">${t.game}</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm font-bold text-[#34C759]">₹${t.entryFee}</div>
+                                <div class="text-xs text-[#8e8e93]">Entry Fee</div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="text-sm">💰 Prize: ₹${t.prizePool}</div>
+                            <div class="text-sm">👥 ${t.currentPlayers}/${t.maxPlayers}</div>
+                        </div>
+                        <div class="progress-bar mb-3">
+                            <div class="progress-fill" style="width: ${(t.currentPlayers / t.maxPlayers) * 100}%"></div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="joinTournament('${doc.id}', ${t.entryFee})" class="flex-1 ios-btn ios-btn-primary py-2">Join Tournament</button>
+                            ${t.status === 'live' ? `<button onclick="openLobby('${doc.id}')" class="ios-btn bg-[#FF3B30] text-white px-4 py-2">LIVE</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        window.joinTournament = (id, fee) => {
+            currentTournament = id;
+            document.getElementById('joinSheet').classList.add('active');
+            
+            // Setup slot grid
+            const grid = document.getElementById('slotGrid');
+            grid.innerHTML = '';
+            for (let i = 1; i <= 16; i++) {
+                grid.innerHTML += `<div class="slot-btn" data-slot="${i}">${i}</div>`;
+            }
+            
+            document.querySelectorAll('.slot-btn').forEach(btn => {
+                btn.onclick = () => {
+                    document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedSlot = parseInt(btn.dataset.slot);
+                };
+            });
+            
+            // Hold to confirm
+            const holdBtn = document.getElementById('holdConfirmBtn');
+            let holdTimer = null;
+            let progress = 0;
+            
+            const startHold = () => {
+                holdTimer = setInterval(() => {
+                    progress += 0.1;
+                    if (progress >= 1) {
+                        clearInterval(holdTimer);
+                        confirmJoin();
+                    }
+                    holdBtn.style.setProperty('--progress', `${progress * 100}%`);
+                }, 300);
+            };
+            
+            const cancelHold = () => {
+                clearInterval(holdTimer);
+                progress = 0;
+                holdBtn.style.setProperty('--progress', '0%');
+            };
+            
+            holdBtn.onmousedown = startHold;
+            holdBtn.onmouseup = cancelHold;
+            holdBtn.onmouseleave = cancelHold;
+            holdBtn.ontouchstart = startHold;
+            holdBtn.ontouchend = cancelHold;
+        };
+        
+        async function confirmJoin() {
+            const uid = document.getElementById('uidInput').value;
+            if (!uid.match(/^\d{9,12}$/)) {
+                showToast('Invalid UID', 'error');
+                return;
+            }
+            if (!selectedSlot) {
+                showToast('Select a slot', 'error');
+                return;
+            }
+            
+            const userDoc = await db.collection('users').doc(currentUser.uid).get();
+            if (userDoc.data().wallet < 50) {
+                showToast('Insufficient balance', 'error');
+                return;
+            }
+            
+            await db.collection('participants').add({
+                userId: currentUser.uid,
+                tournamentId: currentTournament,
+                uid: uid,
+                slot: selectedSlot,
+                joinedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            await db.collection('users').doc(currentUser.uid).update({
+                wallet: firebase.firestore.FieldValue.increment(-50)
+            });
+            
+            closeSheet();
+            confetti.burst();
+            showToast('Successfully joined!');
+            loadUserData();
+        }
+        
+        window.openLobby = (id) => {
+            document.getElementById('lobbySheet').classList.add('active');
+            document.getElementById('roomId').textContent = 'FF' + Math.floor(Math.random() * 10000);
+            document.getElementById('roomPassword').textContent = Math.random().toString(36).substring(2, 8);
+            
+            const playersGrid = document.getElementById('playersGrid');
+            playersGrid.innerHTML = '';
+            for (let i = 1; i <= 16; i++) {
+                const ready = Math.random() > 0.7;
+                playersGrid.innerHTML += `
+                    <div class="text-center p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                        <div class="text-sm font-bold">Slot ${i}</div>
+                        <div class="text-xs ${ready ? 'text-green-500' : 'text-gray-400'}">${ready ? '✓ Ready' : 'Waiting'}</div>
+                    </div>
+                `;
+            }
+        };
+        
+        function loadTab(tab) {
+            currentTab = tab;
+            if (!currentUser) return;
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.toggle('text-[#007AFF]', btn.dataset.tab === tab);
+                btn.classList.toggle('text-[#8e8e93]', btn.dataset.tab !== tab);
+            });
+            
+            switch(tab) {
+                case 'home': loadHome(); break;
+                case 'matches': loadMatches(); break;
+                case 'play': loadLeaderboard(); break;
+                case 'wallet': loadWallet(); break;
+                case 'profile': loadProfile(); break;
+            }
+        }
+        
+        async function loadMatches() {
+            const participants = await db.collection('participants').where('userId', '==', currentUser.uid).get();
+            let html = `<h2 class="text-2xl font-bold mb-4">My Matches</h2>`;
+            participants.forEach(doc => {
+                html += `<div class="ios-card p-4 mb-3">
+                    <div class="flex justify-between">
+                        <div><span class="font-bold">Tournament #${doc.id.slice(0,6)}</span></div>
+                        <div class="text-[#34C759]">Slot ${doc.data().slot}</div>
+                    </div>
+                    <div class="text-sm text-[#8e8e93]">Joined: ${doc.data().joinedAt?.toDate().toLocaleDateString()}</div>
+                </div>`;
+            });
+            contentArea.innerHTML = html;
+        }
+        
+        async function loadLeaderboard() {
+            const users = await db.collection('users').orderBy('wallet', 'desc').limit(50).get();
+            let html = `<h2 class="text-2xl font-bold mb-4">🏆 Top Players</h2>`;
+            let rank = 1;
+            users.forEach(doc => {
+                const data = doc.data();
+                html += `<div class="ios-card p-3 mb-2 flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-[#FFD700] to-[#FFA500] flex items-center justify-center font-bold">${rank}</div>
+                        <div><div class="font-bold">${data.username}</div><div class="text-xs text-[#8e8e93]">${data.rank}</div></div>
+                    </div>
+                    <div class="font-bold text-[#34C759]">₹${data.wallet}</div>
+                </div>`;
+                rank++;
+            });
+            contentArea.innerHTML = html;
+        }
+        
+        async function loadWallet() {
+            const userDoc = await db.collection('users').doc(currentUser.uid).get();
+            const data = userDoc.data();
+            contentArea.innerHTML = `
+                <div class="ios-card p-6 text-center mb-4">
+                    <div class="text-4xl font-bold text-[#34C759]">₹${data.wallet}</div>
+                    <div class="text-[#8e8e93] mt-1">Total Balance</div>
+                </div>
+                <div class="ios-card p-4 mb-4">
+                    <h3 class="font-bold mb-2">Add Money</h3>
+                    <div class="grid grid-cols-4 gap-2 mb-3">
+                        <button onclick="addMoney(100)" class="ios-btn bg-gray-200 dark:bg-gray-800 py-2">₹100</button>
+                        <button onclick="addMoney(500)" class="ios-btn bg-gray-200 dark:bg-gray-800 py-2">₹500</button>
+                        <button onclick="addMoney(1000)" class="ios-btn bg-gray-200 dark:bg-gray-800 py-2">₹1000</button>
+                        <button onclick="addMoney(5000)" class="ios-btn bg-gray-200 dark:bg-gray-800 py-2">₹5000</button>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="number" id="customAmount" placeholder="Custom amount" class="ios-input flex-1">
+                        <button onclick="addMoneyCustom()" class="ios-btn ios-btn-primary px-4">Add</button>
+                    </div>
+                    <div class="mt-3 text-center text-sm text-[#8e8e93]">Pay to: hamro@esports (UPI)</div>
+                </div>
+                <div class="ios-card p-4">
+                    <h3 class="font-bold mb-2">Withdraw</h3>
+                    <div class="flex gap-2">
+                        <input type="number" id="withdrawAmount" placeholder="Amount" class="ios-input flex-1">
+                        <button onclick="withdraw()" class="ios-btn bg-[#FF9500] text-white px-4">Request</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        window.addMoney = (amount) => {
+            showToast(`Added ₹${amount} to wallet`, 'success');
+            db.collection('users').doc(currentUser.uid).update({
+                wallet: firebase.firestore.FieldValue.increment(amount)
+            });
+            loadUserData();
+        };
+        
+        window.addMoneyCustom = () => {
+            const amount = parseInt(document.getElementById('customAmount').value);
+            if (amount > 0) addMoney(amount);
+        };
+        
+        window.withdraw = () => {
+            const amount = parseInt(document.getElementById('withdrawAmount').value);
+            showToast(`Withdrawal request submitted for ₹${amount}`, 'success');
+        };
+        
+        async function loadProfile() {
+            const userDoc = await db.collection('users').doc(currentUser.uid).get();
+            const data = userDoc.data();
+            contentArea.innerHTML = `
+                <div class="ios-card p-6 text-center mb-4">
+                    <div class="w-24 h-24 rounded-full bg-gradient-to-r from-[#007AFF] to-[#AF52DE] flex items-center justify-center mx-auto mb-3 text-4xl text-white">
+                        ${data.username.charAt(0).toUpperCase()}
+                    </div>
+                    <h2 class="text-2xl font-bold">${data.username}</h2>
+                    <div class="flex justify-center gap-4 mt-2">
+                        <div class="text-center"><div class="font-bold">${data.xp || 0}</div><div class="text-xs text-[#8e8e93]">XP</div></div>
+                        <div class="text-center"><div class="font-bold">${data.wallet}</div><div class="text-xs text-[#8e8e93]">Wallet</div></div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="rank-badge rank-${data.rank?.toLowerCase() || 'bronze'} mx-auto">${data.rank || 'Bronze'}</div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="progress-bar"><div class="progress-fill" style="width: ${data.xp % 100}%"></div></div>
+                        <div class="text-xs text-[#8e8e93] mt-1">${100 - (data.xp % 100)} XP to next rank</div>
+                    </div>
+                </div>
+                <div class="ios-card p-4 space-y-3">
+                    <h3 class="font-bold mb-2">Badges</h3>
+                    <div class="grid grid-cols-4 gap-2" id="badgesGrid"></div>
+                    <button onclick="openSupport()" class="w-full ios-btn bg-gray-200 dark:bg-gray-800 py-2">📧 Support</button>
+                    <button onclick="openReport()" class="w-full ios-btn bg-gray-200 dark:bg-gray-800 py-2">⚠️ Report Player</button>
+                    <button onclick="changePassword()" class="w-full ios-btn bg-gray-200 dark:bg-gray-800 py-2">🔑 Change Password</button>
+                    <button onclick="auth.signOut()" class="w-full ios-btn bg-[#FF3B30] text-white py-2">Logout</button>
+                </div>
+            `;
+            
+            const badgesGrid = document.getElementById('badgesGrid');
+            const badges = ['welcome', 'first_win', 'veteran', 'tournament_winner', 'top_10', 'grinder', 'collector', 'legend', 'undisputed', 'mvp', 'clutch', 'champion'];
+            badges.forEach(badge => {
+                const unlocked = data.badges?.includes(badge) || Math.random() > 0.7;
+                badgesGrid.innerHTML += `<div class="text-center ${unlocked ? 'opacity-100' : 'opacity-30'}"><div class="w-12 h-12 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center text-xl">🏅</div><div class="text-xs mt-1">${badge.replace('_', ' ')}</div></div>`;
+            });
+        }
+        
+        window.openSupport = () => {
+            document.getElementById('supportSheet').classList.add('active');
+        };
+        
+        window.openReport = () => {
+            document.getElementById('reportSheet').classList.add('active');
+        };
+        
+        window.changePassword = () => {
+            showToast('Password reset email sent', 'success');
+            auth.sendPasswordResetEmail(currentUser.email);
+        };
+        
+        window.shareResult = (platform) => {
+            showToast(`Shared on ${platform}`);
+        };
+        
+        window.shareResultImage = () => {
+            showToast('Screenshot saved');
+        };
+        
+        // Initialize
+        initDarkMode();
+        
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.onclick = () => loadTab(btn.dataset.tab);
+        });
+        
+        document.getElementById('notificationBell').onclick = () => {
+            document.getElementById('notificationSheet').classList.add('active');
+            document.getElementById('notificationsList').innerHTML = '<div class="ios-card p-3">🎉 New tournament added!</div><div class="ios-card p-3">💰 Your withdrawal is processing</div>';
+        };
+        
+        document.getElementById('markAllRead').onclick = () => {
+            showToast('All notifications marked as read');
+        };
+        
+        document.getElementById('ticketForm').onsubmit = (e) => {
+            e.preventDefault();
+            showToast('Ticket submitted successfully');
+            closeSheet();
+        };
+        
+        document.getElementById('reportForm').onsubmit = (e) => {
+            e.preventDefault();
+            showToast('Report submitted to admins');
+            closeSheet();
+        };
+    </script>
+</body>
+</html>
