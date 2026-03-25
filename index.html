@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#007AFF">
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Hamro Esports | Tournament Arena</title>
     
     <!-- Tailwind CSS -->
@@ -16,20 +15,14 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     
     <style>
-        * {
-            -webkit-tap-highlight-color: transparent;
-        }
-        
+        * { -webkit-tap-highlight-color: transparent; }
         body {
             font-family: -apple-system, 'SF Pro Display', BlinkMacSystemFont, sans-serif;
             background: #f2f2f7;
             transition: background 0.3s ease;
             padding-bottom: 80px;
         }
-        
-        body.dark {
-            background: #000000;
-        }
+        body.dark { background: #000000; }
         
         .ios-card {
             background: #ffffff;
@@ -37,10 +30,7 @@
             box-shadow: 0 2px 20px rgba(0,0,0,0.06);
             transition: all 0.3s ease;
         }
-        
-        body.dark .ios-card {
-            background: #1c1c1e;
-        }
+        body.dark .ios-card { background: #1c1c1e; }
         
         .ios-btn {
             border-radius: 12px;
@@ -48,36 +38,18 @@
             font-weight: 600;
             cursor: pointer;
         }
-        
-        .ios-btn:active {
-            transform: scale(0.98);
-        }
-        
-        .ios-btn-primary {
-            background: #007AFF;
-            color: white;
-        }
+        .ios-btn:active { transform: scale(0.98); }
+        .ios-btn-primary { background: #007AFF; color: white; }
         
         .ios-input {
             border-radius: 10px;
             border: 1px solid #e5e5ea;
             padding: 12px 16px;
-            transition: all 0.3s ease;
             width: 100%;
             font-size: 16px;
         }
-        
-        body.dark .ios-input {
-            background: #2c2c2e;
-            border-color: #3a3a3c;
-            color: white;
-        }
-        
-        .ios-input:focus {
-            outline: none;
-            border-color: #007AFF;
-            box-shadow: 0 0 0 3px rgba(0,122,255,0.1);
-        }
+        body.dark .ios-input { background: #2c2c2e; border-color: #3a3a3c; color: white; }
+        .ios-input:focus { outline: none; border-color: #007AFF; box-shadow: 0 0 0 3px rgba(0,122,255,0.1); }
         
         .bottom-sheet {
             position: fixed;
@@ -91,78 +63,39 @@
             max-height: 85vh;
             overflow-y: auto;
         }
+        body.dark .bottom-sheet { background: #1c1c1e; }
+        .bottom-sheet.active { bottom: 0; }
         
-        body.dark .bottom-sheet {
-            background: #1c1c1e;
-        }
+        .progress-bar { height: 8px; background: #e5e5ea; border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: #007AFF; transition: width 0.3s ease; }
         
-        .bottom-sheet.active {
-            bottom: 0;
-        }
-        
-        .progress-bar {
-            height: 8px;
-            background: #e5e5ea;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: #007AFF;
-            transition: width 0.3s ease;
-        }
-        
-        .rank-badge {
-            display: inline-flex;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-weight: 700;
-            font-size: 12px;
-        }
-        
+        .rank-badge { display: inline-flex; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 12px; }
         .rank-bronze { background: linear-gradient(135deg, #cd7f32, #b87333); color: white; }
         .rank-silver { background: linear-gradient(135deg, #c0c0c0, #a0a0a0); color: white; }
         .rank-gold { background: linear-gradient(135deg, #ffd700, #f4c542); color: white; }
         .rank-platinum { background: linear-gradient(135deg, #e5e4e2, #b0c4de); color: #2c3e50; }
         .rank-diamond { background: linear-gradient(135deg, #b9f2ff, #4ecdc4); color: #1e3c72; }
         
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(0,122,255,0.2);
-            border-top-color: #007AFF;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        .spinner { width: 40px; height: 40px; border: 3px solid rgba(0,122,255,0.2); border-top-color: #007AFF; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
         
         .toast {
             position: fixed;
             bottom: 100px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.9);
             color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
+            padding: 12px 24px;
+            border-radius: 30px;
             z-index: 2000;
             font-size: 14px;
+            font-weight: 500;
             animation: fadeInUp 0.3s ease;
         }
-        
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
         
         .qr-placeholder {
@@ -181,32 +114,29 @@
             transition: all 0.3s;
             cursor: pointer;
         }
+        .amount-card:active { transform: scale(0.98); }
         
-        .amount-card:active {
-            transform: scale(0.98);
+        .balance-animation {
+            transition: all 0.5s ease;
+        }
+        .balance-updated {
+            transform: scale(1.1);
+            color: #34C759;
         }
         
-        .badge-icon {
+        .transaction-item {
             transition: all 0.3s;
         }
-        
-        .badge-icon.locked {
-            filter: grayscale(1);
-            opacity: 0.5;
+        .transaction-item:hover {
+            background: rgba(0,122,255,0.05);
         }
         
-        /* Hide scrollbar for cleaner look */
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
+        .status-pending { background: #FF9500; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; }
+        .status-completed { background: #34C759; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; }
+        .status-rejected { background: #FF3B30; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; }
         
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: #007AFF;
-            border-radius: 2px;
+        .refresh-btn {
+            animation: spin 0.5s ease;
         }
     </style>
 </head>
@@ -225,12 +155,10 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <div id="wallet-badge" class="bg-[#34C759] px-3 py-1 rounded-full text-white text-sm font-semibold">
+                    <div id="wallet-badge" class="bg-[#34C759] px-3 py-1 rounded-full text-white text-sm font-semibold cursor-pointer" onclick="loadTab('wallet')">
                         ₹0
                     </div>
-                    <button id="darkModeToggle" class="w-8 h-8 rounded-full bg-white dark:bg-[#1c1c1e] shadow-md flex items-center justify-center">
-                        🌙
-                    </button>
+                    <button id="darkModeToggle" class="w-8 h-8 rounded-full bg-white dark:bg-[#1c1c1e] shadow-md flex items-center justify-center">🌙</button>
                     <button id="notificationBell" class="relative w-8 h-8 rounded-full bg-white dark:bg-[#1c1c1e] shadow-md flex items-center justify-center">
                         🔔
                         <span id="notificationBadge" class="absolute -top-1 -right-1 bg-[#FF3B30] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center hidden">0</span>
@@ -251,26 +179,11 @@
     <!-- Bottom Navigation -->
     <div class="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-black/90 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800 py-2 z-50">
         <div class="max-w-md mx-auto flex justify-around">
-            <button class="nav-btn flex flex-col items-center gap-1 text-[#8e8e93] transition-colors" data-tab="home">
-                <i class="text-xl">🏠</i>
-                <span class="text-xs font-medium">Home</span>
-            </button>
-            <button class="nav-btn flex flex-col items-center gap-1 text-[#8e8e93] transition-colors" data-tab="matches">
-                <i class="text-xl">⚔️</i>
-                <span class="text-xs font-medium">Matches</span>
-            </button>
-            <button class="nav-btn flex flex-col items-center gap-1 text-[#8e8e93] transition-colors" data-tab="play">
-                <i class="text-xl">🏆</i>
-                <span class="text-xs font-medium">Play</span>
-            </button>
-            <button class="nav-btn flex flex-col items-center gap-1 text-[#8e8e93] transition-colors" data-tab="wallet">
-                <i class="text-xl">💰</i>
-                <span class="text-xs font-medium">Wallet</span>
-            </button>
-            <button class="nav-btn flex flex-col items-center gap-1 text-[#8e8e93] transition-colors" data-tab="profile">
-                <i class="text-xl">👤</i>
-                <span class="text-xs font-medium">Profile</span>
-            </button>
+            <button class="nav-btn flex flex-col items-center gap-1 text-[#8e8e93] transition-colors" data-tab="home"><i class="text-xl">🏠</i><span class="text-xs">Home</span></button>
+            <button class="nav-btn flex flex-col items-center gap-1 text-[#8e8e93] transition-colors" data-tab="matches"><i class="text-xl">⚔️</i><span class="text-xs">Matches</span></button>
+            <button class="nav-btn flex flex-col items-center gap-1 text-[#8e8e93] transition-colors" data-tab="play"><i class="text-xl">🏆</i><span class="text-xs">Play</span></button>
+            <button class="nav-btn flex flex-col items-center gap-1 text-[#8e8e93] transition-colors" data-tab="wallet"><i class="text-xl">💰</i><span class="text-xs">Wallet</span></button>
+            <button class="nav-btn flex flex-col items-center gap-1 text-[#8e8e93] transition-colors" data-tab="profile"><i class="text-xl">👤</i><span class="text-xs">Profile</span></button>
         </div>
     </div>
     
@@ -281,42 +194,21 @@
                 <h3 class="text-xl font-bold dark:text-white">💰 Deposit Money</h3>
                 <button onclick="closeDepositSheet()" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 dark:text-white">✕</button>
             </div>
-            
             <div class="text-center mb-6">
                 <div class="qr-placeholder mx-auto mb-4">
-                    <svg width="160" height="160" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="200" height="200" fill="white"/>
-                        <rect x="20" y="20" width="40" height="40" fill="black"/>
-                        <rect x="80" y="20" width="40" height="40" fill="black"/>
-                        <rect x="140" y="20" width="40" height="40" fill="black"/>
-                        <rect x="20" y="80" width="40" height="40" fill="black"/>
-                        <rect x="140" y="80" width="40" height="40" fill="black"/>
-                        <rect x="20" y="140" width="40" height="40" fill="black"/>
-                        <rect x="80" y="140" width="40" height="40" fill="black"/>
-                        <rect x="140" y="140" width="40" height="40" fill="black"/>
-                        <rect x="35" y="35" width="10" height="10" fill="white"/>
-                        <rect x="95" y="35" width="10" height="10" fill="white"/>
-                        <rect x="155" y="35" width="10" height="10" fill="white"/>
-                        <rect x="35" y="95" width="10" height="10" fill="white"/>
-                        <rect x="155" y="95" width="10" height="10" fill="white"/>
-                        <rect x="35" y="155" width="10" height="10" fill="white"/>
-                        <rect x="95" y="155" width="10" height="10" fill="white"/>
-                        <rect x="155" y="155" width="10" height="10" fill="white"/>
-                    </svg>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=UPI:hamroesports@okhdfcbank&amount=" alt="QR Code" style="width: 150px; height: 150px;">
                 </div>
                 <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-xl mb-3">
                     <p class="text-sm font-mono">hamroesports@okhdfcbank</p>
+                    <button onclick="copyUPI()" class="text-xs text-[#007AFF] mt-1">Copy UPI ID</button>
                 </div>
                 <div class="bg-yellow-500/20 border border-yellow-500/30 rounded-xl p-3 mb-4">
-                    <p class="text-xs text-yellow-700 dark:text-yellow-400">
-                        ⚠️ <strong>Disclaimer:</strong> After payment, share screenshot to admin on WhatsApp
-                    </p>
+                    <p class="text-xs text-yellow-700 dark:text-yellow-400">⚠️ <strong>Instructions:</strong> 1. Pay to UPI ID above 2. Enter amount & transaction ID 3. Send screenshot on WhatsApp 4. Wait for admin approval</p>
                 </div>
                 <a href="#" id="whatsappLink" target="_blank" class="flex items-center justify-center gap-2 bg-[#25D366] text-white py-3 rounded-xl font-semibold mb-4">
                     <span>📱</span> Send Screenshot on WhatsApp
                 </a>
             </div>
-            
             <form id="depositForm" class="space-y-4">
                 <div>
                     <label class="text-sm font-medium mb-1 block dark:text-gray-300">Amount (₹)</label>
@@ -359,9 +251,7 @@
                     <input type="number" id="withdrawAmount" placeholder="Enter amount" class="ios-input" required>
                 </div>
                 <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-3">
-                    <p class="text-xs text-red-600 dark:text-red-400">
-                        ⚠️ Minimum: ₹100 | Processing: 24-48 hours
-                    </p>
+                    <p class="text-xs text-red-600 dark:text-red-400">⚠️ Minimum: ₹100 | Processing: 24-48 hours | Fee: 0%</p>
                 </div>
                 <button type="submit" class="ios-btn bg-[#FF9500] text-white w-full py-3 font-semibold">Request Withdrawal</button>
             </form>
@@ -379,8 +269,8 @@
     </div>
 
     <script>
-        // ========== FIREBASE CONFIGURATION - REPLACE WITH YOUR ACTUAL CONFIG ==========
-        const firebaseConfig = {
+        // Firebase Configuration
+       const firebaseConfig = {
   apiKey: "AIzaSyAPEWF1t1YKFG2-hrzY7IWBaumM4xyLwOs",
   authDomain: "hamro-tournament-09.firebaseapp.com",
   databaseURL: "https://hamro-tournament-09-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -390,7 +280,6 @@
   appId: "1:167377472023:web:ef825e192f564c5ccdea52"
 };
 
-        // ============================================================================
         
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
@@ -411,25 +300,17 @@
         }
         
         function closeSheet() {
-            document.querySelectorAll('.bottom-sheet').forEach(sheet => {
-                sheet.classList.remove('active');
-            });
+            document.querySelectorAll('.bottom-sheet').forEach(sheet => sheet.classList.remove('active'));
         }
         
-        function closeDepositSheet() {
-            document.getElementById('depositSheet').classList.remove('active');
-        }
+        function closeDepositSheet() { document.getElementById('depositSheet').classList.remove('active'); }
+        function closeWithdrawSheet() { document.getElementById('withdrawSheet').classList.remove('active'); }
+        function setDepositAmount(amount) { document.getElementById('depositAmount').value = amount; }
+        function setWithdrawAmount(amount) { document.getElementById('withdrawAmount').value = amount; }
         
-        function closeWithdrawSheet() {
-            document.getElementById('withdrawSheet').classList.remove('active');
-        }
-        
-        function setDepositAmount(amount) {
-            document.getElementById('depositAmount').value = amount;
-        }
-        
-        function setWithdrawAmount(amount) {
-            document.getElementById('withdrawAmount').value = amount;
+        function copyUPI() {
+            navigator.clipboard.writeText('hamroesports@okhdfcbank');
+            showToast('UPI ID copied!');
         }
         
         // Dark Mode
@@ -453,7 +334,9 @@
                 if (walletSpan && data) {
                     walletSpan.textContent = `₹${data.wallet || 0}`;
                 }
+                return data;
             }
+            return null;
         }
         
         // Auth State Listener
@@ -476,6 +359,15 @@
                         totalMatches: 0,
                         totalWins: 0,
                         banned: false,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    // Add welcome bonus transaction
+                    await db.collection('transactions').add({
+                        userId: user.uid,
+                        amount: 100,
+                        type: 'credit',
+                        description: 'Welcome Bonus',
+                        status: 'completed',
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                     showToast('Welcome! ₹100 bonus added');
@@ -518,8 +410,6 @@
                     showToast('Welcome back!');
                 } catch (error) {
                     showToast(error.message, 'error');
-                    document.getElementById('loginForm').classList.add('shake');
-                    setTimeout(() => document.getElementById('loginForm').classList.remove('shake'), 300);
                 }
             };
         }
@@ -563,6 +453,14 @@
                         banned: false,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
+                    await db.collection('transactions').add({
+                        userId: cred.user.uid,
+                        amount: 100,
+                        type: 'credit',
+                        description: 'Welcome Bonus',
+                        status: 'completed',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
                     showToast('Account created! Welcome bonus ₹100');
                 } catch (error) {
                     showToast(error.message, 'error');
@@ -572,23 +470,18 @@
         
         // Wallet Functions
         window.openDepositSheet = () => {
-            if (!currentUser) {
-                showToast('Please login first', 'error');
-                return;
-            }
+            if (!currentUser) { showToast('Please login first', 'error'); return; }
             const userId = currentUser.uid;
+            const username = currentUser.email?.split('@')[0] || 'User';
             const whatsappLink = document.getElementById('whatsappLink');
             if (whatsappLink) {
-                whatsappLink.href = `https://wa.me/9779800000000?text=I%20have%20made%20a%20deposit%20to%20Hamro%20Esports.%20Please%20verify.%0A%0AUser%20ID:%20${userId}%0AAmount:%20₹[AMOUNT]%0ATransaction%20ID:%20[TXN_ID]`;
+                whatsappLink.href = `https://wa.me/9779800000000?text=💰 *DEPOSIT REQUEST*%0A%0A👤 *User:* ${username}%0A🆔 *User ID:* ${userId}%0A📧 *Email:* ${currentUser.email}%0A%0A_Please send screenshot after payment_`;
             }
             document.getElementById('depositSheet').classList.add('active');
         };
         
         window.openWithdrawSheet = async () => {
-            if (!currentUser) {
-                showToast('Please login first', 'error');
-                return;
-            }
+            if (!currentUser) { showToast('Please login first', 'error'); return; }
             const userDoc = await db.collection('users').doc(currentUser.uid).get();
             const upiId = userDoc.data()?.upiId || '';
             document.getElementById('withdrawUpi').value = upiId;
@@ -598,24 +491,22 @@
         // Deposit Handler
         document.getElementById('depositForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!currentUser) {
-                showToast('Please login first', 'error');
-                return;
-            }
+            if (!currentUser) { showToast('Please login first', 'error'); return; }
             
             const amount = parseInt(document.getElementById('depositAmount').value);
             const transactionId = document.getElementById('transactionId').value;
             
-            if (!amount || amount < 50) {
-                showToast('Minimum deposit is ₹50', 'error');
-                return;
-            }
-            if (!transactionId) {
-                showToast('Please enter transaction ID', 'error');
-                return;
-            }
+            if (!amount || amount < 50) { showToast('Minimum deposit is ₹50', 'error'); return; }
+            if (!transactionId) { showToast('Please enter transaction ID', 'error'); return; }
             
             try {
+                // Check for duplicate transaction ID
+                const existingDeposits = await db.collection('deposits').where('transactionId', '==', transactionId).get();
+                if (!existingDeposits.empty) {
+                    showToast('Transaction ID already submitted!', 'error');
+                    return;
+                }
+                
                 await db.collection('deposits').add({
                     userId: currentUser.uid,
                     amount: amount,
@@ -628,14 +519,15 @@
                     userId: currentUser.uid,
                     amount: amount,
                     type: 'credit',
-                    description: `Deposit request - ${transactionId}`,
+                    description: `Deposit request - ₹${amount} (${transactionId})`,
                     status: 'pending',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
-                showToast('Deposit request submitted! Admin will verify.');
+                showToast('Deposit request submitted! Admin will verify within 24 hours.');
                 closeDepositSheet();
                 document.getElementById('depositForm').reset();
+                loadTab('wallet');
             } catch (error) {
                 showToast(error.message, 'error');
             }
@@ -644,32 +536,31 @@
         // Withdrawal Handler
         document.getElementById('withdrawForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!currentUser) {
-                showToast('Please login first', 'error');
-                return;
-            }
+            if (!currentUser) { showToast('Please login first', 'error'); return; }
             
             const amount = parseInt(document.getElementById('withdrawAmount').value);
             const upiId = document.getElementById('withdrawUpi').value;
             
-            if (!amount || amount < 100) {
-                showToast('Minimum withdrawal is ₹100', 'error');
-                return;
-            }
-            if (!upiId) {
-                showToast('Please enter UPI ID', 'error');
-                return;
-            }
+            if (!amount || amount < 100) { showToast('Minimum withdrawal is ₹100', 'error'); return; }
+            if (!upiId) { showToast('Please enter UPI ID', 'error'); return; }
             
             const userDoc = await db.collection('users').doc(currentUser.uid).get();
             const currentBalance = userDoc.data()?.wallet || 0;
             
-            if (amount > currentBalance) {
-                showToast('Insufficient balance', 'error');
-                return;
-            }
+            if (amount > currentBalance) { showToast('Insufficient balance', 'error'); return; }
             
             try {
+                // Check for pending withdrawal
+                const pendingWithdrawals = await db.collection('withdrawals')
+                    .where('userId', '==', currentUser.uid)
+                    .where('status', '==', 'pending')
+                    .get();
+                
+                if (!pendingWithdrawals.empty) {
+                    showToast('You already have a pending withdrawal request!', 'error');
+                    return;
+                }
+                
                 await db.collection('withdrawals').add({
                     userId: currentUser.uid,
                     amount: amount,
@@ -687,52 +578,85 @@
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
-                showToast('Withdrawal request submitted!');
+                showToast('Withdrawal request submitted! Processing within 24-48 hours.');
                 closeWithdrawSheet();
                 document.getElementById('withdrawForm').reset();
+                loadTab('wallet');
             } catch (error) {
                 showToast(error.message, 'error');
             }
         });
         
-        // Load Wallet
+        // Load Wallet Section - COMPLETE REWRITE WITH FULL FUNCTIONALITY
         async function loadWallet() {
             if (!currentUser) return;
+            
+            showToast('Loading wallet...', 'success');
             
             const userDoc = await db.collection('users').doc(currentUser.uid).get();
             const data = userDoc.data();
             
-            const deposits = await db.collection('deposits').where('userId', '==', currentUser.uid).get();
-            let totalDeposited = data.totalDeposited || 0;
-            deposits.forEach(doc => {
+            // Calculate total deposited (completed deposits)
+            const depositsSnapshot = await db.collection('deposits').where('userId', '==', currentUser.uid).get();
+            let totalDeposited = 0;
+            depositsSnapshot.forEach(doc => {
                 if (doc.data().status === 'completed') {
                     totalDeposited += doc.data().amount;
                 }
             });
             
-            const transactions = await db.collection('transactions')
+            // Calculate total winnings (from completed tournament wins)
+            const winningsSnapshot = await db.collection('transactions')
+                .where('userId', '==', currentUser.uid)
+                .where('type', '==', 'credit')
+                .where('description', '>=', 'Won tournament')
+                .get();
+            let totalWinnings = 0;
+            winningsSnapshot.forEach(doc => {
+                if (doc.data().status === 'completed') {
+                    totalWinnings += doc.data().amount;
+                }
+            });
+            
+            // Get all transactions
+            const transactionsSnapshot = await db.collection('transactions')
                 .where('userId', '==', currentUser.uid)
                 .orderBy('createdAt', 'desc')
-                .limit(10)
+                .limit(20)
+                .get();
+            
+            // Get pending deposits
+            const pendingDeposits = await db.collection('deposits')
+                .where('userId', '==', currentUser.uid)
+                .where('status', '==', 'pending')
+                .get();
+            
+            // Get pending withdrawals
+            const pendingWithdrawals = await db.collection('withdrawals')
+                .where('userId', '==', currentUser.uid)
+                .where('status', '==', 'pending')
                 .get();
             
             let transactionsHtml = '';
-            if (transactions.empty) {
+            if (transactionsSnapshot.empty) {
                 transactionsHtml = '<div class="text-center text-gray-500 py-4">No transactions yet</div>';
             } else {
-                transactions.forEach(doc => {
+                transactionsSnapshot.forEach(doc => {
                     const t = doc.data();
                     const date = t.createdAt?.toDate() || new Date();
                     const typeColor = t.type === 'credit' ? 'text-green-500' : 'text-red-500';
                     const typeSign = t.type === 'credit' ? '+' : '-';
+                    const statusClass = t.status === 'completed' ? 'status-completed' : (t.status === 'pending' ? 'status-pending' : 'status-rejected');
+                    const statusText = t.status || 'completed';
+                    
                     transactionsHtml += `
-                        <div class="flex justify-between items-center border-b border-gray-100 dark:border-gray-700 py-3">
-                            <div>
+                        <div class="transaction-item flex justify-between items-center border-b border-gray-100 dark:border-gray-700 py-3">
+                            <div class="flex-1">
                                 <div class="text-sm font-medium dark:text-white">${t.description}</div>
                                 <div class="text-xs text-gray-400">${date.toLocaleString()}</div>
-                                ${t.status ? `<div class="text-xs ${t.status === 'pending' ? 'text-yellow-500' : 'text-green-500'} mt-1">${t.status}</div>` : ''}
+                                <span class="${statusClass} inline-block mt-1">${statusText}</span>
                             </div>
-                            <div class="${typeColor} font-bold">
+                            <div class="${typeColor} font-bold ml-3">
                                 ${typeSign} ₹${t.amount}
                             </div>
                         </div>
@@ -740,36 +664,112 @@
                 });
             }
             
+            // Pending requests HTML
+            let pendingHtml = '';
+            if (pendingDeposits.size > 0 || pendingWithdrawals.size > 0) {
+                pendingHtml = `
+                    <div class="ios-card p-4 mb-4 bg-yellow-500/10 border border-yellow-500/30">
+                        <h3 class="font-bold mb-2 dark:text-white">⏳ Pending Requests</h3>
+                        ${pendingDeposits.size > 0 ? `<p class="text-sm text-yellow-600">💰 Deposit: ${pendingDeposits.size} request(s) pending</p>` : ''}
+                        ${pendingWithdrawals.size > 0 ? `<p class="text-sm text-yellow-600">💸 Withdrawal: ${pendingWithdrawals.size} request(s) pending</p>` : ''}
+                        <p class="text-xs text-gray-500 mt-2">Admin will process within 24-48 hours</p>
+                    </div>
+                `;
+            }
+            
             const content = document.getElementById('content-area');
             content.innerHTML = `
+                <!-- Balance Cards -->
                 <div class="grid grid-cols-3 gap-3 mb-4">
-                    <div class="ios-card p-3 text-center">
-                        <div class="text-xs text-gray-500 mb-1">Balance</div>
-                        <div class="text-xl font-bold text-green-500">₹${data.wallet || 0}</div>
+                    <div class="ios-card p-3 text-center amount-card" onclick="refreshWallet()">
+                        <div class="text-xs text-gray-500 mb-1">💰 Balance</div>
+                        <div class="text-xl font-bold text-green-500 balance-amount">₹${data.wallet || 0}</div>
                     </div>
                     <div class="ios-card p-3 text-center">
-                        <div class="text-xs text-gray-500 mb-1">Deposited</div>
+                        <div class="text-xs text-gray-500 mb-1">📥 Deposited</div>
                         <div class="text-xl font-bold text-blue-500">₹${totalDeposited}</div>
                     </div>
                     <div class="ios-card p-3 text-center">
-                        <div class="text-xs text-gray-500 mb-1">Winnings</div>
-                        <div class="text-xl font-bold text-yellow-500">₹${data.totalWinnings || 0}</div>
+                        <div class="text-xs text-gray-500 mb-1">🏆 Winnings</div>
+                        <div class="text-xl font-bold text-yellow-500">₹${totalWinnings}</div>
                     </div>
                 </div>
                 
+                ${pendingHtml}
+                
+                <!-- Action Buttons -->
                 <div class="grid grid-cols-2 gap-3 mb-4">
-                    <button onclick="openDepositSheet()" class="ios-btn bg-[#34C759] text-white py-3 rounded-xl font-semibold">💰 Deposit</button>
-                    <button onclick="openWithdrawSheet()" class="ios-btn bg-[#FF9500] text-white py-3 rounded-xl font-semibold">💸 Withdraw</button>
+                    <button onclick="openDepositSheet()" class="ios-btn bg-[#34C759] text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2">
+                        💰 Deposit
+                    </button>
+                    <button onclick="openWithdrawSheet()" class="ios-btn bg-[#FF9500] text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2">
+                        💸 Withdraw
+                    </button>
                 </div>
                 
+                <!-- Quick Actions -->
+                <div class="grid grid-cols-3 gap-2 mb-4">
+                    <button onclick="quickAddMoney(50)" class="ios-btn bg-gray-100 dark:bg-gray-800 py-2 rounded-xl text-sm">+₹50</button>
+                    <button onclick="quickAddMoney(200)" class="ios-btn bg-gray-100 dark:bg-gray-800 py-2 rounded-xl text-sm">+₹200</button>
+                    <button onclick="quickAddMoney(500)" class="ios-btn bg-gray-100 dark:bg-gray-800 py-2 rounded-xl text-sm">+₹500</button>
+                </div>
+                
+                <!-- Transaction History -->
                 <div class="ios-card p-4">
-                    <h3 class="font-bold mb-3 dark:text-white">📜 Transaction History</h3>
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold dark:text-white">📜 Transaction History</h3>
+                        <button onclick="refreshWallet()" class="text-xs text-[#007AFF]">⟳ Refresh</button>
+                    </div>
                     ${transactionsHtml}
                 </div>
             `;
         }
         
-        // Load Profile
+        // Quick Add Money Function (for testing/demo)
+        window.quickAddMoney = async (amount) => {
+            if (!currentUser) { showToast('Please login first', 'error'); return; }
+            
+            try {
+                const userRef = db.collection('users').doc(currentUser.uid);
+                const userDoc = await userRef.get();
+                const currentBalance = userDoc.data().wallet || 0;
+                
+                await userRef.update({
+                    wallet: currentBalance + amount,
+                    totalDeposited: (userDoc.data().totalDeposited || 0) + amount
+                });
+                
+                await db.collection('transactions').add({
+                    userId: currentUser.uid,
+                    amount: amount,
+                    type: 'credit',
+                    description: `Quick deposit - ₹${amount}`,
+                    status: 'completed',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                await db.collection('deposits').add({
+                    userId: currentUser.uid,
+                    amount: amount,
+                    transactionId: `QUICK_${Date.now()}`,
+                    status: 'completed',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                showToast(`₹${amount} added successfully!`);
+                updateWalletDisplay();
+                loadTab('wallet');
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        };
+        
+        window.refreshWallet = () => {
+            showToast('Refreshing wallet...');
+            loadTab('wallet');
+        };
+        
+        // Load Profile Section
         async function loadProfile() {
             if (!currentUser) return;
             
@@ -818,7 +818,7 @@
                 
                 <div class="ios-card p-4 space-y-3">
                     <div>
-                        <label class="text-sm text-gray-500 block mb-1">UPI ID</label>
+                        <label class="text-sm text-gray-500 block mb-1">UPI ID (for withdrawals)</label>
                         <div class="flex gap-2">
                             <input type="text" id="upiInput" value="${data.upiId || ''}" placeholder="yourname@upi" class="ios-input flex-1">
                             <button onclick="updateUPI()" class="ios-btn ios-btn-primary px-4">Save</button>
@@ -832,10 +832,7 @@
         
         window.updateUPI = async () => {
             const upiId = document.getElementById('upiInput').value;
-            if (!upiId) {
-                showToast('Please enter UPI ID', 'error');
-                return;
-            }
+            if (!upiId) { showToast('Please enter UPI ID', 'error'); return; }
             await db.collection('users').doc(currentUser.uid).update({ upiId: upiId });
             showToast('UPI ID updated!');
         };
@@ -937,8 +934,9 @@
             document.getElementById('notificationSheet').classList.add('active');
             document.getElementById('notificationsList').innerHTML = `
                 <div class="ios-card p-3">🎉 Welcome to Hamro Esports!</div>
-                <div class="ios-card p-3">💰 Add money to start playing</div>
-                <div class="ios-card p-3">🏆 Tournaments coming soon!</div>
+                <div class="ios-card p-3">💰 Add money to start playing tournaments</div>
+                <div class="ios-card p-3">🏆 Tournaments coming soon! Stay tuned</div>
+                <div class="ios-card p-3">💸 Withdrawals processed within 24-48 hours</div>
             `;
         };
     </script>
