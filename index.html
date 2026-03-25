@@ -116,27 +116,32 @@
         }
         .amount-card:active { transform: scale(0.98); }
         
-        .balance-animation {
-            transition: all 0.5s ease;
-        }
         .balance-updated {
-            transform: scale(1.1);
-            color: #34C759;
+            animation: balancePop 0.5s ease;
+        }
+        @keyframes balancePop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); color: #34C759; }
+            100% { transform: scale(1); }
         }
         
-        .transaction-item {
-            transition: all 0.3s;
-        }
-        .transaction-item:hover {
-            background: rgba(0,122,255,0.05);
-        }
+        .status-pending { background: #FF9500; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; display: inline-block; }
+        .status-completed { background: #34C759; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; display: inline-block; }
+        .status-rejected { background: #FF3B30; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; display: inline-block; }
         
-        .status-pending { background: #FF9500; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; }
-        .status-completed { background: #34C759; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; }
-        .status-rejected { background: #FF3B30; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; }
+        .copy-btn {
+            background: #f0f0f0;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-btn:active { transform: scale(0.95); background: #e0e0e0; }
+        body.dark .copy-btn { background: #3a3a3c; color: white; }
         
-        .refresh-btn {
-            animation: spin 0.5s ease;
+        .esewa-gradient {
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
         }
     </style>
 </head>
@@ -187,28 +192,46 @@
         </div>
     </div>
     
-    <!-- Deposit Modal -->
+    <!-- eSewa Deposit Modal -->
     <div id="depositSheet" class="bottom-sheet">
         <div class="p-6">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold dark:text-white">💰 Deposit Money</h3>
+                <h3 class="text-xl font-bold dark:text-white">💰 Deposit via eSewa</h3>
                 <button onclick="closeDepositSheet()" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 dark:text-white">✕</button>
             </div>
             <div class="text-center mb-6">
-                <div class="qr-placeholder mx-auto mb-4">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=UPI:hamroesports@okhdfcbank&amount=" alt="QR Code" style="width: 150px; height: 150px;">
+                <!-- eSewa QR Code -->
+                <div class="qr-placeholder mx-auto mb-4 esewa-gradient flex items-center justify-center">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=esewa:9841234567@esewa&amount=" alt="eSewa QR Code" style="width: 140px; height: 140px; border-radius: 12px;">
                 </div>
-                <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-xl mb-3">
-                    <p class="text-sm font-mono">hamroesports@okhdfcbank</p>
-                    <button onclick="copyUPI()" class="text-xs text-[#007AFF] mt-1">Copy UPI ID</button>
+                
+                <!-- eSewa ID Display -->
+                <div class="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 p-4 rounded-xl mb-3">
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">📱 eSewa ID</p>
+                    <div class="flex items-center justify-between gap-2">
+                        <p class="text-lg font-mono font-bold text-green-700 dark:text-green-400">9841234567@esewa</p>
+                        <button onclick="copyEsewaId()" class="copy-btn bg-white dark:bg-gray-700 shadow-sm">📋 Copy</button>
+                    </div>
                 </div>
-                <div class="bg-yellow-500/20 border border-yellow-500/30 rounded-xl p-3 mb-4">
-                    <p class="text-xs text-yellow-700 dark:text-yellow-400">⚠️ <strong>Instructions:</strong> 1. Pay to UPI ID above 2. Enter amount & transaction ID 3. Send screenshot on WhatsApp 4. Wait for admin approval</p>
+                
+                <!-- Instructions -->
+                <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-3 mb-4">
+                    <p class="text-xs text-yellow-700 dark:text-yellow-400 text-left">
+                        <strong>📌 Instructions:</strong><br>
+                        1. Open eSewa app<br>
+                        2. Send payment to: <span class="font-mono">9841234567@esewa</span><br>
+                        3. Enter amount & transaction ID below<br>
+                        4. Send screenshot on WhatsApp<br>
+                        5. Wait for admin approval
+                    </p>
                 </div>
+                
+                <!-- WhatsApp Button -->
                 <a href="#" id="whatsappLink" target="_blank" class="flex items-center justify-center gap-2 bg-[#25D366] text-white py-3 rounded-xl font-semibold mb-4">
-                    <span>📱</span> Send Screenshot on WhatsApp
+                    📱 Send Screenshot on WhatsApp
                 </a>
             </div>
+            
             <form id="depositForm" class="space-y-4">
                 <div>
                     <label class="text-sm font-medium mb-1 block dark:text-gray-300">Amount (₹)</label>
@@ -221,25 +244,26 @@
                     <input type="number" id="depositAmount" placeholder="Enter amount" class="ios-input" required>
                 </div>
                 <div>
-                    <label class="text-sm font-medium mb-1 block dark:text-gray-300">Transaction ID / UTR</label>
-                    <input type="text" id="transactionId" placeholder="Enter transaction ID" class="ios-input" required>
+                    <label class="text-sm font-medium mb-1 block dark:text-gray-300">eSewa Transaction ID</label>
+                    <input type="text" id="transactionId" placeholder="Enter eSewa transaction ID" class="ios-input" required>
                 </div>
                 <button type="submit" class="ios-btn ios-btn-primary w-full py-3">Submit Deposit Request</button>
             </form>
         </div>
     </div>
     
-    <!-- Withdrawal Modal -->
+    <!-- eSewa Withdrawal Modal -->
     <div id="withdrawSheet" class="bottom-sheet">
         <div class="p-6">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold dark:text-white">💸 Withdraw Money</h3>
+                <h3 class="text-xl font-bold dark:text-white">💸 Withdraw to eSewa</h3>
                 <button onclick="closeWithdrawSheet()" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 dark:text-white">✕</button>
             </div>
             <form id="withdrawForm" class="space-y-4">
                 <div>
-                    <label class="text-sm font-medium mb-1 block dark:text-gray-300">UPI ID</label>
-                    <input type="text" id="withdrawUpi" placeholder="Enter your UPI ID" class="ios-input" required>
+                    <label class="text-sm font-medium mb-1 block dark:text-gray-300">eSewa ID</label>
+                    <input type="text" id="withdrawEsewa" placeholder="Enter your eSewa ID (e.g., 98XXXXXXXX@esewa)" class="ios-input" required>
+                    <p class="text-xs text-gray-400 mt-1">Format: 98XXXXXXXX@esewa or phone number</p>
                 </div>
                 <div>
                     <label class="text-sm font-medium mb-1 block dark:text-gray-300">Amount (₹)</label>
@@ -250,10 +274,10 @@
                     </div>
                     <input type="number" id="withdrawAmount" placeholder="Enter amount" class="ios-input" required>
                 </div>
-                <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-3">
-                    <p class="text-xs text-red-600 dark:text-red-400">⚠️ Minimum: ₹100 | Processing: 24-48 hours | Fee: 0%</p>
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3">
+                    <p class="text-xs text-red-600 dark:text-red-400">⚠️ Minimum: ₹100 | Processing: 24-48 hours | No withdrawal fee</p>
                 </div>
-                <button type="submit" class="ios-btn bg-[#FF9500] text-white w-full py-3 font-semibold">Request Withdrawal</button>
+                <button type="submit" class="ios-btn bg-[#FF9500] text-white w-full py-3 font-semibold">Request Withdrawal to eSewa</button>
             </form>
         </div>
     </div>
@@ -270,16 +294,15 @@
 
     <script>
         // Firebase Configuration
-       const firebaseConfig = {
-  apiKey: "AIzaSyAPEWF1t1YKFG2-hrzY7IWBaumM4xyLwOs",
-  authDomain: "hamro-tournament-09.firebaseapp.com",
-  databaseURL: "https://hamro-tournament-09-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "hamro-tournament-09",
-  storageBucket: "hamro-tournament-09.firebasestorage.app",
-  messagingSenderId: "167377472023",
-  appId: "1:167377472023:web:ef825e192f564c5ccdea52"
-};
-
+        const firebaseConfig = {
+            apiKey: "AIzaSyAPEWF1t1YKFG2-hrzY7IWBaumM4xyLwOs",
+            authDomain: "hamro-tournament-09.firebaseapp.com",
+            databaseURL: "https://hamro-tournament-09-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "hamro-tournament-09",
+            storageBucket: "hamro-tournament-09.firebasestorage.app",
+            messagingSenderId: "167377472023",
+            appId: "1:167377472023:web:ef825e192f564c5ccdea52"
+        };
         
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
@@ -308,9 +331,9 @@
         function setDepositAmount(amount) { document.getElementById('depositAmount').value = amount; }
         function setWithdrawAmount(amount) { document.getElementById('withdrawAmount').value = amount; }
         
-        function copyUPI() {
-            navigator.clipboard.writeText('hamroesports@okhdfcbank');
-            showToast('UPI ID copied!');
+        function copyEsewaId() {
+            navigator.clipboard.writeText('9841234567@esewa');
+            showToast('eSewa ID copied!');
         }
         
         // Dark Mode
@@ -352,7 +375,7 @@
                         wallet: 100,
                         totalDeposited: 0,
                         totalWinnings: 0,
-                        upiId: '',
+                        esewaId: '',
                         rank: 'Bronze',
                         xp: 0,
                         badges: ['welcome'],
@@ -361,7 +384,6 @@
                         banned: false,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
-                    // Add welcome bonus transaction
                     await db.collection('transactions').add({
                         userId: user.uid,
                         amount: 100,
@@ -444,7 +466,7 @@
                         wallet: 100,
                         totalDeposited: 0,
                         totalWinnings: 0,
-                        upiId: '',
+                        esewaId: '',
                         rank: 'Bronze',
                         xp: 0,
                         badges: ['welcome'],
@@ -468,14 +490,14 @@
             };
         };
         
-        // Wallet Functions
+        // eSewa Deposit Functions
         window.openDepositSheet = () => {
             if (!currentUser) { showToast('Please login first', 'error'); return; }
             const userId = currentUser.uid;
             const username = currentUser.email?.split('@')[0] || 'User';
             const whatsappLink = document.getElementById('whatsappLink');
             if (whatsappLink) {
-                whatsappLink.href = `https://wa.me/9779800000000?text=💰 *DEPOSIT REQUEST*%0A%0A👤 *User:* ${username}%0A🆔 *User ID:* ${userId}%0A📧 *Email:* ${currentUser.email}%0A%0A_Please send screenshot after payment_`;
+                whatsappLink.href = `https://wa.me/9779800000000?text=💰 *eSewa DEPOSIT REQUEST*%0A%0A👤 *User:* ${username}%0A🆔 *User ID:* ${userId}%0A📧 *Email:* ${currentUser.email}%0A💳 *eSewa ID:* 9841234567@esewa%0A%0A_Please send eSewa transaction screenshot after payment_`;
             }
             document.getElementById('depositSheet').classList.add('active');
         };
@@ -483,8 +505,8 @@
         window.openWithdrawSheet = async () => {
             if (!currentUser) { showToast('Please login first', 'error'); return; }
             const userDoc = await db.collection('users').doc(currentUser.uid).get();
-            const upiId = userDoc.data()?.upiId || '';
-            document.getElementById('withdrawUpi').value = upiId;
+            const esewaId = userDoc.data()?.esewaId || '';
+            document.getElementById('withdrawEsewa').value = esewaId;
             document.getElementById('withdrawSheet').classList.add('active');
         };
         
@@ -497,10 +519,9 @@
             const transactionId = document.getElementById('transactionId').value;
             
             if (!amount || amount < 50) { showToast('Minimum deposit is ₹50', 'error'); return; }
-            if (!transactionId) { showToast('Please enter transaction ID', 'error'); return; }
+            if (!transactionId) { showToast('Please enter eSewa transaction ID', 'error'); return; }
             
             try {
-                // Check for duplicate transaction ID
                 const existingDeposits = await db.collection('deposits').where('transactionId', '==', transactionId).get();
                 if (!existingDeposits.empty) {
                     showToast('Transaction ID already submitted!', 'error');
@@ -511,6 +532,7 @@
                     userId: currentUser.uid,
                     amount: amount,
                     transactionId: transactionId,
+                    paymentMethod: 'eSewa',
                     status: 'pending',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
@@ -519,12 +541,12 @@
                     userId: currentUser.uid,
                     amount: amount,
                     type: 'credit',
-                    description: `Deposit request - ₹${amount} (${transactionId})`,
+                    description: `eSewa Deposit - ₹${amount} (${transactionId})`,
                     status: 'pending',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
-                showToast('Deposit request submitted! Admin will verify within 24 hours.');
+                showToast('eSewa deposit request submitted! Admin will verify within 24 hours.');
                 closeDepositSheet();
                 document.getElementById('depositForm').reset();
                 loadTab('wallet');
@@ -539,10 +561,10 @@
             if (!currentUser) { showToast('Please login first', 'error'); return; }
             
             const amount = parseInt(document.getElementById('withdrawAmount').value);
-            const upiId = document.getElementById('withdrawUpi').value;
+            const esewaId = document.getElementById('withdrawEsewa').value;
             
             if (!amount || amount < 100) { showToast('Minimum withdrawal is ₹100', 'error'); return; }
-            if (!upiId) { showToast('Please enter UPI ID', 'error'); return; }
+            if (!esewaId) { showToast('Please enter your eSewa ID', 'error'); return; }
             
             const userDoc = await db.collection('users').doc(currentUser.uid).get();
             const currentBalance = userDoc.data()?.wallet || 0;
@@ -550,7 +572,6 @@
             if (amount > currentBalance) { showToast('Insufficient balance', 'error'); return; }
             
             try {
-                // Check for pending withdrawal
                 const pendingWithdrawals = await db.collection('withdrawals')
                     .where('userId', '==', currentUser.uid)
                     .where('status', '==', 'pending')
@@ -561,10 +582,14 @@
                     return;
                 }
                 
+                // Save eSewa ID for future
+                await db.collection('users').doc(currentUser.uid).update({ esewaId: esewaId });
+                
                 await db.collection('withdrawals').add({
                     userId: currentUser.uid,
                     amount: amount,
-                    upiId: upiId,
+                    esewaId: esewaId,
+                    paymentMethod: 'eSewa',
                     status: 'pending',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
@@ -573,12 +598,12 @@
                     userId: currentUser.uid,
                     amount: amount,
                     type: 'debit',
-                    description: `Withdrawal request - ₹${amount}`,
+                    description: `eSewa Withdrawal request - ₹${amount}`,
                     status: 'pending',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
-                showToast('Withdrawal request submitted! Processing within 24-48 hours.');
+                showToast('eSewa withdrawal request submitted! Processing within 24-48 hours.');
                 closeWithdrawSheet();
                 document.getElementById('withdrawForm').reset();
                 loadTab('wallet');
@@ -587,16 +612,13 @@
             }
         });
         
-        // Load Wallet Section - COMPLETE REWRITE WITH FULL FUNCTIONALITY
+        // Load Wallet Section with eSewa Integration
         async function loadWallet() {
             if (!currentUser) return;
-            
-            showToast('Loading wallet...', 'success');
             
             const userDoc = await db.collection('users').doc(currentUser.uid).get();
             const data = userDoc.data();
             
-            // Calculate total deposited (completed deposits)
             const depositsSnapshot = await db.collection('deposits').where('userId', '==', currentUser.uid).get();
             let totalDeposited = 0;
             depositsSnapshot.forEach(doc => {
@@ -605,7 +627,6 @@
                 }
             });
             
-            // Calculate total winnings (from completed tournament wins)
             const winningsSnapshot = await db.collection('transactions')
                 .where('userId', '==', currentUser.uid)
                 .where('type', '==', 'credit')
@@ -618,20 +639,17 @@
                 }
             });
             
-            // Get all transactions
             const transactionsSnapshot = await db.collection('transactions')
                 .where('userId', '==', currentUser.uid)
                 .orderBy('createdAt', 'desc')
                 .limit(20)
                 .get();
             
-            // Get pending deposits
             const pendingDeposits = await db.collection('deposits')
                 .where('userId', '==', currentUser.uid)
                 .where('status', '==', 'pending')
                 .get();
             
-            // Get pending withdrawals
             const pendingWithdrawals = await db.collection('withdrawals')
                 .where('userId', '==', currentUser.uid)
                 .where('status', '==', 'pending')
@@ -650,7 +668,7 @@
                     const statusText = t.status || 'completed';
                     
                     transactionsHtml += `
-                        <div class="transaction-item flex justify-between items-center border-b border-gray-100 dark:border-gray-700 py-3">
+                        <div class="flex justify-between items-center border-b border-gray-100 dark:border-gray-700 py-3">
                             <div class="flex-1">
                                 <div class="text-sm font-medium dark:text-white">${t.description}</div>
                                 <div class="text-xs text-gray-400">${date.toLocaleString()}</div>
@@ -664,14 +682,13 @@
                 });
             }
             
-            // Pending requests HTML
             let pendingHtml = '';
             if (pendingDeposits.size > 0 || pendingWithdrawals.size > 0) {
                 pendingHtml = `
                     <div class="ios-card p-4 mb-4 bg-yellow-500/10 border border-yellow-500/30">
                         <h3 class="font-bold mb-2 dark:text-white">⏳ Pending Requests</h3>
-                        ${pendingDeposits.size > 0 ? `<p class="text-sm text-yellow-600">💰 Deposit: ${pendingDeposits.size} request(s) pending</p>` : ''}
-                        ${pendingWithdrawals.size > 0 ? `<p class="text-sm text-yellow-600">💸 Withdrawal: ${pendingWithdrawals.size} request(s) pending</p>` : ''}
+                        ${pendingDeposits.size > 0 ? `<p class="text-sm text-yellow-600">💰 eSewa Deposit: ${pendingDeposits.size} request(s) pending</p>` : ''}
+                        ${pendingWithdrawals.size > 0 ? `<p class="text-sm text-yellow-600">💸 eSewa Withdrawal: ${pendingWithdrawals.size} request(s) pending</p>` : ''}
                         <p class="text-xs text-gray-500 mt-2">Admin will process within 24-48 hours</p>
                     </div>
                 `;
@@ -700,10 +717,10 @@
                 <!-- Action Buttons -->
                 <div class="grid grid-cols-2 gap-3 mb-4">
                     <button onclick="openDepositSheet()" class="ios-btn bg-[#34C759] text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2">
-                        💰 Deposit
+                        💰 Deposit via eSewa
                     </button>
                     <button onclick="openWithdrawSheet()" class="ios-btn bg-[#FF9500] text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2">
-                        💸 Withdraw
+                        💸 Withdraw to eSewa
                     </button>
                 </div>
                 
@@ -725,7 +742,7 @@
             `;
         }
         
-        // Quick Add Money Function (for testing/demo)
+        // Quick Add Money Function
         window.quickAddMoney = async (amount) => {
             if (!currentUser) { showToast('Please login first', 'error'); return; }
             
@@ -743,7 +760,7 @@
                     userId: currentUser.uid,
                     amount: amount,
                     type: 'credit',
-                    description: `Quick deposit - ₹${amount}`,
+                    description: `Quick deposit via eSewa - ₹${amount}`,
                     status: 'completed',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
@@ -752,6 +769,7 @@
                     userId: currentUser.uid,
                     amount: amount,
                     transactionId: `QUICK_${Date.now()}`,
+                    paymentMethod: 'eSewa',
                     status: 'completed',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
@@ -818,10 +836,10 @@
                 
                 <div class="ios-card p-4 space-y-3">
                     <div>
-                        <label class="text-sm text-gray-500 block mb-1">UPI ID (for withdrawals)</label>
+                        <label class="text-sm text-gray-500 block mb-1">eSewa ID (for withdrawals)</label>
                         <div class="flex gap-2">
-                            <input type="text" id="upiInput" value="${data.upiId || ''}" placeholder="yourname@upi" class="ios-input flex-1">
-                            <button onclick="updateUPI()" class="ios-btn ios-btn-primary px-4">Save</button>
+                            <input type="text" id="esewaInput" value="${data.esewaId || ''}" placeholder="98XXXXXXXX@esewa" class="ios-input flex-1">
+                            <button onclick="updateEsewa()" class="ios-btn ios-btn-primary px-4">Save</button>
                         </div>
                     </div>
                     <button onclick="changePassword()" class="w-full ios-btn bg-gray-200 dark:bg-gray-800 py-3 rounded-xl font-semibold">🔑 Change Password</button>
@@ -830,11 +848,11 @@
             `;
         }
         
-        window.updateUPI = async () => {
-            const upiId = document.getElementById('upiInput').value;
-            if (!upiId) { showToast('Please enter UPI ID', 'error'); return; }
-            await db.collection('users').doc(currentUser.uid).update({ upiId: upiId });
-            showToast('UPI ID updated!');
+        window.updateEsewa = async () => {
+            const esewaId = document.getElementById('esewaInput').value;
+            if (!esewaId) { showToast('Please enter eSewa ID', 'error'); return; }
+            await db.collection('users').doc(currentUser.uid).update({ esewaId: esewaId });
+            showToast('eSewa ID updated!');
         };
         
         window.changePassword = () => {
@@ -874,7 +892,7 @@
                     <div class="text-4xl mb-3">🎯</div>
                     <h3 class="font-bold text-lg mb-2">Tournaments Coming Soon!</h3>
                     <p class="text-sm text-gray-500">Stay tuned for exciting tournaments</p>
-                    <button onclick="loadTab('wallet')" class="mt-4 ios-btn ios-btn-primary px-6 py-2">Add Funds</button>
+                    <button onclick="loadTab('wallet')" class="mt-4 ios-btn ios-btn-primary px-6 py-2">Add Funds via eSewa</button>
                 </div>
             `;
         }
@@ -934,9 +952,9 @@
             document.getElementById('notificationSheet').classList.add('active');
             document.getElementById('notificationsList').innerHTML = `
                 <div class="ios-card p-3">🎉 Welcome to Hamro Esports!</div>
-                <div class="ios-card p-3">💰 Add money to start playing tournaments</div>
+                <div class="ios-card p-3">💰 Add money via eSewa to start playing tournaments</div>
                 <div class="ios-card p-3">🏆 Tournaments coming soon! Stay tuned</div>
-                <div class="ios-card p-3">💸 Withdrawals processed within 24-48 hours</div>
+                <div class="ios-card p-3">💸 Withdrawals to eSewa processed within 24-48 hours</div>
             `;
         };
     </script>
