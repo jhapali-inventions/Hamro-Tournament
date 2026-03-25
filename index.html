@@ -10,7 +10,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Firebase Compat CDN -->
+    <!-- Firebase Compat CDN Scripts ONLY -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -46,6 +46,7 @@
             border-radius: 12px;
             transition: all 0.2s;
             font-weight: 600;
+            cursor: pointer;
         }
         
         .ios-btn:active {
@@ -62,6 +63,8 @@
             border: 1px solid #e5e5ea;
             padding: 12px 16px;
             transition: all 0.3s ease;
+            width: 100%;
+            font-size: 16px;
         }
         
         body.dark .ios-input {
@@ -97,30 +100,6 @@
             bottom: 0;
         }
         
-        .slot-btn {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            background: #f2f2f7;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        body.dark .slot-btn {
-            background: #2c2c2e;
-            color: white;
-        }
-        
-        .slot-btn.selected {
-            background: #007AFF;
-            color: white;
-            transform: scale(1.05);
-        }
-        
         .progress-bar {
             height: 8px;
             background: #e5e5ea;
@@ -135,13 +114,11 @@
         }
         
         .rank-badge {
-            width: 40px;
-            height: 40px;
+            display: inline-flex;
+            padding: 4px 12px;
             border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
+            font-weight: 700;
+            font-size: 12px;
         }
         
         .rank-bronze { background: linear-gradient(135deg, #cd7f32, #b87333); color: white; }
@@ -174,20 +151,22 @@
             border-radius: 25px;
             z-index: 2000;
             font-size: 14px;
+            animation: fadeInUp 0.3s ease;
         }
         
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-        
-        .shake {
-            animation: shake 0.3s ease-in-out;
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
         }
         
         .qr-placeholder {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: white;
             width: 200px;
             height: 200px;
             margin: 0 auto;
@@ -195,14 +174,39 @@
             align-items: center;
             justify-content: center;
             border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
         
         .amount-card {
             transition: all 0.3s;
+            cursor: pointer;
         }
         
-        .amount-card:hover {
-            transform: translateY(-2px);
+        .amount-card:active {
+            transform: scale(0.98);
+        }
+        
+        .badge-icon {
+            transition: all 0.3s;
+        }
+        
+        .badge-icon.locked {
+            filter: grayscale(1);
+            opacity: 0.5;
+        }
+        
+        /* Hide scrollbar for cleaner look */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #007AFF;
+            border-radius: 2px;
         }
     </style>
 </head>
@@ -216,7 +220,7 @@
                         <span class="text-white font-bold text-xl">🏆</span>
                     </div>
                     <div>
-                        <h1 class="font-extrabold text-xl">Hamro Esports</h1>
+                        <h1 class="font-extrabold text-xl dark:text-white">Hamro Esports</h1>
                         <p class="text-xs text-[#8e8e93]">Tournament Arena</p>
                     </div>
                 </div>
@@ -278,50 +282,41 @@
                 <button onclick="closeDepositSheet()" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 dark:text-white">✕</button>
             </div>
             
-            <!-- QR Code Section -->
             <div class="text-center mb-6">
                 <div class="qr-placeholder mx-auto mb-4">
-                    <div class="bg-white p-4 rounded-xl">
-                        <svg width="160" height="160" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                            <rect width="200" height="200" fill="white"/>
-                            <!-- QR Pattern -->
-                            <rect x="20" y="20" width="40" height="40" fill="black"/>
-                            <rect x="80" y="20" width="40" height="40" fill="black"/>
-                            <rect x="140" y="20" width="40" height="40" fill="black"/>
-                            <rect x="20" y="80" width="40" height="40" fill="black"/>
-                            <rect x="140" y="80" width="40" height="40" fill="black"/>
-                            <rect x="20" y="140" width="40" height="40" fill="black"/>
-                            <rect x="80" y="140" width="40" height="40" fill="black"/>
-                            <rect x="140" y="140" width="40" height="40" fill="black"/>
-                            <!-- Inner pattern -->
-                            <rect x="35" y="35" width="10" height="10" fill="white"/>
-                            <rect x="95" y="35" width="10" height="10" fill="white"/>
-                            <rect x="155" y="35" width="10" height="10" fill="white"/>
-                            <rect x="35" y="95" width="10" height="10" fill="white"/>
-                            <rect x="155" y="95" width="10" height="10" fill="white"/>
-                            <rect x="35" y="155" width="10" height="10" fill="white"/>
-                            <rect x="95" y="155" width="10" height="10" fill="white"/>
-                            <rect x="155" y="155" width="10" height="10" fill="white"/>
-                        </svg>
-                    </div>
+                    <svg width="160" height="160" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="200" height="200" fill="white"/>
+                        <rect x="20" y="20" width="40" height="40" fill="black"/>
+                        <rect x="80" y="20" width="40" height="40" fill="black"/>
+                        <rect x="140" y="20" width="40" height="40" fill="black"/>
+                        <rect x="20" y="80" width="40" height="40" fill="black"/>
+                        <rect x="140" y="80" width="40" height="40" fill="black"/>
+                        <rect x="20" y="140" width="40" height="40" fill="black"/>
+                        <rect x="80" y="140" width="40" height="40" fill="black"/>
+                        <rect x="140" y="140" width="40" height="40" fill="black"/>
+                        <rect x="35" y="35" width="10" height="10" fill="white"/>
+                        <rect x="95" y="35" width="10" height="10" fill="white"/>
+                        <rect x="155" y="35" width="10" height="10" fill="white"/>
+                        <rect x="35" y="95" width="10" height="10" fill="white"/>
+                        <rect x="155" y="95" width="10" height="10" fill="white"/>
+                        <rect x="35" y="155" width="10" height="10" fill="white"/>
+                        <rect x="95" y="155" width="10" height="10" fill="white"/>
+                        <rect x="155" y="155" width="10" height="10" fill="white"/>
+                    </svg>
                 </div>
                 <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-xl mb-3">
                     <p class="text-sm font-mono">hamroesports@okhdfcbank</p>
                 </div>
                 <div class="bg-yellow-500/20 border border-yellow-500/30 rounded-xl p-3 mb-4">
                     <p class="text-xs text-yellow-700 dark:text-yellow-400">
-                        ⚠️ <strong>Disclaimer:</strong> After payment is done, you must share screenshot of transaction to admin for verification.
+                        ⚠️ <strong>Disclaimer:</strong> After payment, share screenshot to admin on WhatsApp
                     </p>
                 </div>
-                <a href="https://wa.me/9779800000000?text=I%20have%20made%20a%20deposit%20of%20₹[AMOUNT]%20to%20Hamro%20Esports.%20Here%20is%20my%20transaction%20screenshot.%20User%20ID:%20[USER_ID]" 
-                   id="whatsappLink" 
-                   target="_blank" 
-                   class="flex items-center justify-center gap-2 bg-green-500 text-white py-3 rounded-xl font-semibold mb-4">
+                <a href="#" id="whatsappLink" target="_blank" class="flex items-center justify-center gap-2 bg-[#25D366] text-white py-3 rounded-xl font-semibold mb-4">
                     <span>📱</span> Send Screenshot on WhatsApp
                 </a>
             </div>
             
-            <!-- Deposit Form -->
             <form id="depositForm" class="space-y-4">
                 <div>
                     <label class="text-sm font-medium mb-1 block dark:text-gray-300">Amount (₹)</label>
@@ -331,11 +326,11 @@
                         <button type="button" onclick="setDepositAmount(1000)" class="py-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm font-semibold">₹1000</button>
                         <button type="button" onclick="setDepositAmount(5000)" class="py-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm font-semibold">₹5000</button>
                     </div>
-                    <input type="number" id="depositAmount" placeholder="Enter amount" class="ios-input w-full" required>
+                    <input type="number" id="depositAmount" placeholder="Enter amount" class="ios-input" required>
                 </div>
                 <div>
                     <label class="text-sm font-medium mb-1 block dark:text-gray-300">Transaction ID / UTR</label>
-                    <input type="text" id="transactionId" placeholder="Enter transaction ID" class="ios-input w-full" required>
+                    <input type="text" id="transactionId" placeholder="Enter transaction ID" class="ios-input" required>
                 </div>
                 <button type="submit" class="ios-btn ios-btn-primary w-full py-3">Submit Deposit Request</button>
             </form>
@@ -352,7 +347,7 @@
             <form id="withdrawForm" class="space-y-4">
                 <div>
                     <label class="text-sm font-medium mb-1 block dark:text-gray-300">UPI ID</label>
-                    <input type="text" id="withdrawUpi" placeholder="Enter your UPI ID" class="ios-input w-full" required>
+                    <input type="text" id="withdrawUpi" placeholder="Enter your UPI ID" class="ios-input" required>
                 </div>
                 <div>
                     <label class="text-sm font-medium mb-1 block dark:text-gray-300">Amount (₹)</label>
@@ -361,11 +356,11 @@
                         <button type="button" onclick="setWithdrawAmount(500)" class="py-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm">₹500</button>
                         <button type="button" onclick="setWithdrawAmount(1000)" class="py-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm">₹1000</button>
                     </div>
-                    <input type="number" id="withdrawAmount" placeholder="Enter amount" class="ios-input w-full" required>
+                    <input type="number" id="withdrawAmount" placeholder="Enter amount" class="ios-input" required>
                 </div>
                 <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-3">
                     <p class="text-xs text-red-600 dark:text-red-400">
-                        ⚠️ Minimum withdrawal: ₹100 | Processing time: 24-48 hours
+                        ⚠️ Minimum: ₹100 | Processing: 24-48 hours
                     </p>
                 </div>
                 <button type="submit" class="ios-btn bg-[#FF9500] text-white w-full py-3 font-semibold">Request Withdrawal</button>
@@ -382,60 +377,31 @@
             <div id="notificationsList" class="space-y-3 max-h-96 overflow-y-auto"></div>
         </div>
     </div>
-    
-    <div id="supportSheet" class="bottom-sheet">
-        <div class="p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold dark:text-white">Support Ticket</h3>
-                <button onclick="closeSheet()" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 dark:text-white">✕</button>
-            </div>
-            <form id="ticketForm" class="space-y-4">
-                <input type="text" id="ticketSubject" placeholder="Subject" class="ios-input w-full" required>
-                <textarea id="ticketMessage" rows="4" placeholder="Describe your issue..." class="ios-input w-full" required></textarea>
-                <button type="submit" class="ios-btn ios-btn-primary w-full py-3">Submit Ticket</button>
-            </form>
-        </div>
-    </div>
-    
-    <div id="reportSheet" class="bottom-sheet">
-        <div class="p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold dark:text-white">Report Player</h3>
-                <button onclick="closeSheet()" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 dark:text-white">✕</button>
-            </div>
-            <form id="reportForm" class="space-y-4">
-                <input type="text" id="reportedUid" placeholder="Player UID" class="ios-input w-full" required>
-                <select id="reportReason" class="ios-input w-full" required>
-                    <option value="">Select reason</option>
-                    <option value="cheating">Cheating/Hacking</option>
-                    <option value="toxic">Toxic Behavior</option>
-                    <option value="afk">AFK/Leaving</option>
-                    <option value="teaming">Team Killing</option>
-                </select>
-                <textarea id="reportDescription" rows="3" placeholder="Additional details..." class="ios-input w-full"></textarea>
-                <button type="submit" class="ios-btn ios-btn-primary w-full py-3">Submit Report</button>
-            </form>
-        </div>
-    </div>
 
     <script>
-        // Firebase Configuration
+        // ========== FIREBASE CONFIGURATION - REPLACE WITH YOUR ACTUAL CONFIG ==========
         const firebaseConfig = {
-            apiKey: "AIzaSyAPEWF1t1YKFG2-hrzY7IWBaumM4xyLwOs",
-            authDomain: "hamro-tournament-09.firebaseapp.com",
-            projectId: "hamro-tournament-09",
-            storageBucket: "hamro-tournament-09.firebasestorage.app",
-            messagingSenderId: "167377472023",
-            appId: "1:167377472023:web:ef825e192f564c5ccdea52"
-        };
+  apiKey: "AIzaSyAPEWF1t1YKFG2-hrzY7IWBaumM4xyLwOs",
+  authDomain: "hamro-tournament-09.firebaseapp.com",
+  databaseURL: "https://hamro-tournament-09-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "hamro-tournament-09",
+  storageBucket: "hamro-tournament-09.firebasestorage.app",
+  messagingSenderId: "167377472023",
+  appId: "1:167377472023:web:ef825e192f564c5ccdea52"
+};
+
+        // ============================================================================
         
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
         
+        // App State
         let currentUser = null;
         let currentTab = 'home';
         
+        // Helper Functions
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
             toast.className = `toast ${type === 'error' ? 'bg-red-500' : 'bg-green-500'}`;
@@ -478,7 +444,19 @@
             };
         }
         
-        // Auth Check
+        // Update Wallet Display
+        async function updateWalletDisplay() {
+            if (currentUser) {
+                const doc = await db.collection('users').doc(currentUser.uid).get();
+                const data = doc.data();
+                const walletSpan = document.getElementById('wallet-badge');
+                if (walletSpan && data) {
+                    walletSpan.textContent = `₹${data.wallet || 0}`;
+                }
+            }
+        }
+        
+        // Auth State Listener
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 currentUser = user;
@@ -491,29 +469,26 @@
                         wallet: 100,
                         totalDeposited: 0,
                         totalWinnings: 0,
+                        upiId: '',
                         rank: 'Bronze',
                         xp: 0,
                         badges: ['welcome'],
+                        totalMatches: 0,
+                        totalWins: 0,
                         banned: false,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                     showToast('Welcome! ₹100 bonus added');
                 }
-                updateWalletDisplay();
+                await updateWalletDisplay();
                 loadTab(currentTab);
             } else {
+                currentUser = null;
                 showAuthScreen();
             }
         });
         
-        async function updateWalletDisplay() {
-            if (currentUser) {
-                const doc = await db.collection('users').doc(currentUser.uid).get();
-                const data = doc.data();
-                document.getElementById('wallet-badge').textContent = `₹${data?.wallet || 0}`;
-            }
-        }
-        
+        // Auth Screen
         function showAuthScreen() {
             const content = document.getElementById('content-area');
             content.innerHTML = `
@@ -526,8 +501,8 @@
                         <p class="text-[#8e8e93] mt-1">Join tournaments & win prizes</p>
                     </div>
                     <form id="loginForm" class="space-y-4">
-                        <input type="email" id="loginEmail" placeholder="Email" class="ios-input w-full" required>
-                        <input type="password" id="loginPassword" placeholder="Password" class="ios-input w-full" required>
+                        <input type="email" id="loginEmail" placeholder="Email" class="ios-input" required>
+                        <input type="password" id="loginPassword" placeholder="Password" class="ios-input" required>
                         <button type="submit" class="ios-btn ios-btn-primary w-full py-3">Sign In</button>
                         <button type="button" onclick="showSignUp()" class="w-full text-[#007AFF]">Create Account</button>
                     </form>
@@ -543,6 +518,8 @@
                     showToast('Welcome back!');
                 } catch (error) {
                     showToast(error.message, 'error');
+                    document.getElementById('loginForm').classList.add('shake');
+                    setTimeout(() => document.getElementById('loginForm').classList.remove('shake'), 300);
                 }
             };
         }
@@ -553,9 +530,9 @@
                 <div class="ios-card p-6 space-y-6">
                     <h2 class="text-2xl font-extrabold text-center">Create Account</h2>
                     <form id="signupForm" class="space-y-4">
-                        <input type="text" id="signupUsername" placeholder="Username" class="ios-input w-full" required>
-                        <input type="email" id="signupEmail" placeholder="Email" class="ios-input w-full" required>
-                        <input type="password" id="signupPassword" placeholder="Password" class="ios-input w-full" required>
+                        <input type="text" id="signupUsername" placeholder="Username" class="ios-input" required>
+                        <input type="email" id="signupEmail" placeholder="Email" class="ios-input" required>
+                        <input type="password" id="signupPassword" placeholder="Password" class="ios-input" required>
                         <button type="submit" class="ios-btn ios-btn-primary w-full py-3">Sign Up</button>
                         <button type="button" onclick="location.reload()" class="w-full text-[#007AFF]">Back to Login</button>
                     </form>
@@ -577,9 +554,12 @@
                         wallet: 100,
                         totalDeposited: 0,
                         totalWinnings: 0,
+                        upiId: '',
                         rank: 'Bronze',
                         xp: 0,
                         badges: ['welcome'],
+                        totalMatches: 0,
+                        totalWins: 0,
                         banned: false,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
@@ -590,81 +570,13 @@
             };
         };
         
-        // Wallet Section
-        async function loadWallet() {
-            const userDoc = await db.collection('users').doc(currentUser.uid).get();
-            const data = userDoc.data();
-            
-            // Get deposit requests
-            const deposits = await db.collection('deposits').where('userId', '==', currentUser.uid).get();
-            let totalDeposited = data.totalDeposited || 0;
-            
-            // Get withdrawal requests
-            const withdrawals = await db.collection('withdrawals').where('userId', '==', currentUser.uid).get();
-            
-            // Get transaction history
-            const transactions = await db.collection('transactions')
-                .where('userId', '==', currentUser.uid)
-                .orderBy('createdAt', 'desc')
-                .limit(10)
-                .get();
-            
-            let transactionsHtml = '';
-            transactions.forEach(doc => {
-                const t = doc.data();
-                const date = t.createdAt?.toDate() || new Date();
-                transactionsHtml += `
-                    <div class="flex justify-between items-center border-b border-gray-100 dark:border-gray-700 py-3">
-                        <div>
-                            <div class="text-sm font-medium dark:text-white">${t.description}</div>
-                            <div class="text-xs text-gray-400">${date.toLocaleString()}</div>
-                        </div>
-                        <div class="${t.type === 'credit' ? 'text-green-500' : 'text-red-500'} font-bold">
-                            ${t.type === 'credit' ? '+' : '-'} ₹${t.amount}
-                        </div>
-                    </div>
-                `;
-            });
-            
-            const content = document.getElementById('content-area');
-            content.innerHTML = `
-                <!-- Balance Overview -->
-                <div class="grid grid-cols-3 gap-3 mb-4">
-                    <div class="ios-card p-3 text-center amount-card">
-                        <div class="text-xs text-gray-500 mb-1">Total Balance</div>
-                        <div class="text-xl font-bold text-green-500">₹${data.wallet || 0}</div>
-                    </div>
-                    <div class="ios-card p-3 text-center amount-card">
-                        <div class="text-xs text-gray-500 mb-1">Deposited</div>
-                        <div class="text-xl font-bold text-blue-500">₹${totalDeposited}</div>
-                    </div>
-                    <div class="ios-card p-3 text-center amount-card">
-                        <div class="text-xs text-gray-500 mb-1">Winnings</div>
-                        <div class="text-xl font-bold text-yellow-500">₹${data.totalWinnings || 0}</div>
-                    </div>
-                </div>
-                
-                <!-- Action Buttons -->
-                <div class="grid grid-cols-2 gap-3 mb-4">
-                    <button onclick="openDepositSheet()" class="ios-btn bg-[#34C759] text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2">
-                        💰 Deposit
-                    </button>
-                    <button onclick="openWithdrawSheet()" class="ios-btn bg-[#FF9500] text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2">
-                        💸 Withdraw
-                    </button>
-                </div>
-                
-                <!-- Transaction History -->
-                <div class="ios-card p-4">
-                    <h3 class="font-bold mb-3 dark:text-white">📜 Transaction History</h3>
-                    ${transactionsHtml || '<div class="text-center text-gray-500 py-4">No transactions yet</div>'}
-                </div>
-            `;
-        }
-        
+        // Wallet Functions
         window.openDepositSheet = () => {
-            // Update WhatsApp link with user ID
-            const userId = currentUser?.uid || '';
+            if (!currentUser) {
+                showToast('Please login first', 'error');
+                return;
+            }
+            const userId = currentUser.uid;
             const whatsappLink = document.getElementById('whatsappLink');
             if (whatsappLink) {
                 whatsappLink.href = `https://wa.me/9779800000000?text=I%20have%20made%20a%20deposit%20to%20Hamro%20Esports.%20Please%20verify.%0A%0AUser%20ID:%20${userId}%0AAmount:%20₹[AMOUNT]%0ATransaction%20ID:%20[TXN_ID]`;
@@ -673,21 +585,29 @@
         };
         
         window.openWithdrawSheet = async () => {
-            // Get user's UPI ID
+            if (!currentUser) {
+                showToast('Please login first', 'error');
+                return;
+            }
             const userDoc = await db.collection('users').doc(currentUser.uid).get();
             const upiId = userDoc.data()?.upiId || '';
             document.getElementById('withdrawUpi').value = upiId;
             document.getElementById('withdrawSheet').classList.add('active');
         };
         
-        // Deposit Form Handler
+        // Deposit Handler
         document.getElementById('depositForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!currentUser) {
+                showToast('Please login first', 'error');
+                return;
+            }
+            
             const amount = parseInt(document.getElementById('depositAmount').value);
             const transactionId = document.getElementById('transactionId').value;
             
             if (!amount || amount < 50) {
-                showToast('Minimum deposit amount is ₹50', 'error');
+                showToast('Minimum deposit is ₹50', 'error');
                 return;
             }
             if (!transactionId) {
@@ -704,7 +624,16 @@
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
-                showToast('Deposit request submitted! Admin will verify within 24 hours.');
+                await db.collection('transactions').add({
+                    userId: currentUser.uid,
+                    amount: amount,
+                    type: 'credit',
+                    description: `Deposit request - ${transactionId}`,
+                    status: 'pending',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                showToast('Deposit request submitted! Admin will verify.');
                 closeDepositSheet();
                 document.getElementById('depositForm').reset();
             } catch (error) {
@@ -712,18 +641,23 @@
             }
         });
         
-        // Withdrawal Form Handler
+        // Withdrawal Handler
         document.getElementById('withdrawForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!currentUser) {
+                showToast('Please login first', 'error');
+                return;
+            }
+            
             const amount = parseInt(document.getElementById('withdrawAmount').value);
             const upiId = document.getElementById('withdrawUpi').value;
             
             if (!amount || amount < 100) {
-                showToast('Minimum withdrawal amount is ₹100', 'error');
+                showToast('Minimum withdrawal is ₹100', 'error');
                 return;
             }
             if (!upiId) {
-                showToast('Please enter your UPI ID', 'error');
+                showToast('Please enter UPI ID', 'error');
                 return;
             }
             
@@ -744,7 +678,16 @@
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
-                showToast('Withdrawal request submitted! Processing within 24-48 hours.');
+                await db.collection('transactions').add({
+                    userId: currentUser.uid,
+                    amount: amount,
+                    type: 'debit',
+                    description: `Withdrawal request - ₹${amount}`,
+                    status: 'pending',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                showToast('Withdrawal request submitted!');
                 closeWithdrawSheet();
                 document.getElementById('withdrawForm').reset();
             } catch (error) {
@@ -752,25 +695,200 @@
             }
         });
         
-        // Simple placeholder functions for other tabs
-        async function loadHome() {
+        // Load Wallet
+        async function loadWallet() {
+            if (!currentUser) return;
+            
+            const userDoc = await db.collection('users').doc(currentUser.uid).get();
+            const data = userDoc.data();
+            
+            const deposits = await db.collection('deposits').where('userId', '==', currentUser.uid).get();
+            let totalDeposited = data.totalDeposited || 0;
+            deposits.forEach(doc => {
+                if (doc.data().status === 'completed') {
+                    totalDeposited += doc.data().amount;
+                }
+            });
+            
+            const transactions = await db.collection('transactions')
+                .where('userId', '==', currentUser.uid)
+                .orderBy('createdAt', 'desc')
+                .limit(10)
+                .get();
+            
+            let transactionsHtml = '';
+            if (transactions.empty) {
+                transactionsHtml = '<div class="text-center text-gray-500 py-4">No transactions yet</div>';
+            } else {
+                transactions.forEach(doc => {
+                    const t = doc.data();
+                    const date = t.createdAt?.toDate() || new Date();
+                    const typeColor = t.type === 'credit' ? 'text-green-500' : 'text-red-500';
+                    const typeSign = t.type === 'credit' ? '+' : '-';
+                    transactionsHtml += `
+                        <div class="flex justify-between items-center border-b border-gray-100 dark:border-gray-700 py-3">
+                            <div>
+                                <div class="text-sm font-medium dark:text-white">${t.description}</div>
+                                <div class="text-xs text-gray-400">${date.toLocaleString()}</div>
+                                ${t.status ? `<div class="text-xs ${t.status === 'pending' ? 'text-yellow-500' : 'text-green-500'} mt-1">${t.status}</div>` : ''}
+                            </div>
+                            <div class="${typeColor} font-bold">
+                                ${typeSign} ₹${t.amount}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
             const content = document.getElementById('content-area');
             content.innerHTML = `
-                <div class="ios-card p-6 text-center">
-                    <div class="text-4xl mb-3">🎮</div>
-                    <h2 class="text-xl font-bold mb-2">Welcome to Hamro Esports!</h2>
-                    <p class="text-gray-500">Tournaments coming soon. Check back later!</p>
+                <div class="grid grid-cols-3 gap-3 mb-4">
+                    <div class="ios-card p-3 text-center">
+                        <div class="text-xs text-gray-500 mb-1">Balance</div>
+                        <div class="text-xl font-bold text-green-500">₹${data.wallet || 0}</div>
+                    </div>
+                    <div class="ios-card p-3 text-center">
+                        <div class="text-xs text-gray-500 mb-1">Deposited</div>
+                        <div class="text-xl font-bold text-blue-500">₹${totalDeposited}</div>
+                    </div>
+                    <div class="ios-card p-3 text-center">
+                        <div class="text-xs text-gray-500 mb-1">Winnings</div>
+                        <div class="text-xl font-bold text-yellow-500">₹${data.totalWinnings || 0}</div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <button onclick="openDepositSheet()" class="ios-btn bg-[#34C759] text-white py-3 rounded-xl font-semibold">💰 Deposit</button>
+                    <button onclick="openWithdrawSheet()" class="ios-btn bg-[#FF9500] text-white py-3 rounded-xl font-semibold">💸 Withdraw</button>
+                </div>
+                
+                <div class="ios-card p-4">
+                    <h3 class="font-bold mb-3 dark:text-white">📜 Transaction History</h3>
+                    ${transactionsHtml}
                 </div>
             `;
         }
         
-        async function loadMatches() {
+        // Load Profile
+        async function loadProfile() {
+            if (!currentUser) return;
+            
+            const userDoc = await db.collection('users').doc(currentUser.uid).get();
+            const data = userDoc.data();
+            
+            const xp = data.xp || 0;
+            const xpProgress = xp % 100;
+            const rankClass = `rank-${(data.rank || 'bronze').toLowerCase()}`;
+            
             const content = document.getElementById('content-area');
             content.innerHTML = `
+                <div class="ios-card p-6 text-center mb-4">
+                    <div class="w-24 h-24 rounded-full bg-gradient-to-r from-[#007AFF] to-[#AF52DE] flex items-center justify-center mx-auto mb-3 text-4xl text-white font-bold">
+                        ${(data.username || 'U').charAt(0).toUpperCase()}
+                    </div>
+                    <h2 class="text-2xl font-bold dark:text-white">${data.username}</h2>
+                    <p class="text-gray-500 text-sm">${currentUser.email}</p>
+                    <div class="inline-block mt-2">
+                        <span class="rank-badge ${rankClass}">${data.rank || 'Bronze'}</span>
+                    </div>
+                </div>
+                
+                <div class="ios-card p-4 space-y-4 mb-4">
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="text-gray-500">XP Progress</span>
+                            <span class="font-bold">${xpProgress}/100 XP</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${xpProgress}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                            <div class="text-lg font-bold text-blue-500">${data.totalMatches || 0}</div>
+                            <div class="text-xs text-gray-500">Matches</div>
+                        </div>
+                        <div class="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                            <div class="text-lg font-bold text-yellow-500">${data.totalWins || 0}</div>
+                            <div class="text-xs text-gray-500">Wins</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="ios-card p-4 space-y-3">
+                    <div>
+                        <label class="text-sm text-gray-500 block mb-1">UPI ID</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="upiInput" value="${data.upiId || ''}" placeholder="yourname@upi" class="ios-input flex-1">
+                            <button onclick="updateUPI()" class="ios-btn ios-btn-primary px-4">Save</button>
+                        </div>
+                    </div>
+                    <button onclick="changePassword()" class="w-full ios-btn bg-gray-200 dark:bg-gray-800 py-3 rounded-xl font-semibold">🔑 Change Password</button>
+                    <button onclick="logout()" class="w-full ios-btn bg-red-500 text-white py-3 rounded-xl font-semibold">Logout</button>
+                </div>
+            `;
+        }
+        
+        window.updateUPI = async () => {
+            const upiId = document.getElementById('upiInput').value;
+            if (!upiId) {
+                showToast('Please enter UPI ID', 'error');
+                return;
+            }
+            await db.collection('users').doc(currentUser.uid).update({ upiId: upiId });
+            showToast('UPI ID updated!');
+        };
+        
+        window.changePassword = () => {
+            auth.sendPasswordResetEmail(currentUser.email);
+            showToast('Password reset email sent!');
+        };
+        
+        window.logout = async () => {
+            await auth.signOut();
+            showToast('Logged out');
+        };
+        
+        // Home Tab
+        async function loadHome() {
+            if (!currentUser) return;
+            const userDoc = await db.collection('users').doc(currentUser.uid).get();
+            const data = userDoc.data();
+            
+            document.getElementById('content-area').innerHTML = `
+                <div class="bg-gradient-to-r from-[#007AFF] to-[#AF52DE] rounded-2xl p-4 mb-4 text-white">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-lg">Welcome, ${data.username}!</h3>
+                            <p class="text-sm opacity-90">Ready to play?</p>
+                        </div>
+                        <div class="text-3xl">🎮</div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-3 mb-4">
+                    <div class="ios-card p-3 text-center"><div class="text-xl font-bold text-green-500">₹${data.wallet}</div><div class="text-xs text-gray-500">Wallet</div></div>
+                    <div class="ios-card p-3 text-center"><div class="text-xl font-bold text-blue-500">${data.totalMatches || 0}</div><div class="text-xs text-gray-500">Matches</div></div>
+                    <div class="ios-card p-3 text-center"><div class="text-xl font-bold text-yellow-500">${data.totalWins || 0}</div><div class="text-xs text-gray-500">Wins</div></div>
+                </div>
+                
+                <div class="ios-card p-6 text-center">
+                    <div class="text-4xl mb-3">🎯</div>
+                    <h3 class="font-bold text-lg mb-2">Tournaments Coming Soon!</h3>
+                    <p class="text-sm text-gray-500">Stay tuned for exciting tournaments</p>
+                    <button onclick="loadTab('wallet')" class="mt-4 ios-btn ios-btn-primary px-6 py-2">Add Funds</button>
+                </div>
+            `;
+        }
+        
+        function loadMatches() {
+            document.getElementById('content-area').innerHTML = `
                 <div class="ios-card p-6 text-center">
                     <div class="text-4xl mb-3">⚔️</div>
                     <h2 class="text-xl font-bold mb-2">My Matches</h2>
-                    <p class="text-gray-500">You haven't joined any tournaments yet.</p>
+                    <p class="text-gray-500">No matches joined yet</p>
+                    <button onclick="loadTab('home')" class="mt-4 ios-btn ios-btn-primary px-6 py-2">Browse</button>
                 </div>
             `;
         }
@@ -781,50 +899,11 @@
             let rank = 1;
             users.forEach(doc => {
                 const data = doc.data();
-                html += `
-                    <div class="ios-card p-3 mb-2 flex justify-between items-center">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center font-bold text-white">${rank}</div>
-                            <div><div class="font-bold">${data.username}</div><div class="text-xs text-gray-500">${data.rank}</div></div>
-                        </div>
-                        <div class="font-bold text-green-500">₹${data.wallet}</div>
-                    </div>
-                `;
+                const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+                html += `<div class="ios-card p-3 mb-2 flex justify-between items-center"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center font-bold">${medal}</div><div><div class="font-bold dark:text-white">${data.username}</div><div class="text-xs text-gray-500">${data.rank}</div></div></div><div class="font-bold text-green-500">₹${data.wallet}</div></div>`;
                 rank++;
             });
             document.getElementById('content-area').innerHTML = html;
-        }
-        
-        async function loadProfile() {
-            const userDoc = await db.collection('users').doc(currentUser.uid).get();
-            const data = userDoc.data();
-            const content = document.getElementById('content-area');
-            content.innerHTML = `
-                <div class="ios-card p-6 text-center mb-4">
-                    <div class="w-24 h-24 rounded-full bg-gradient-to-r from-[#007AFF] to-[#AF52DE] flex items-center justify-center mx-auto mb-3 text-4xl text-white">
-                        ${data.username.charAt(0).toUpperCase()}
-                    </div>
-                    <h2 class="text-2xl font-bold">${data.username}</h2>
-                    <p class="text-gray-500">${currentUser.email}</p>
-                    <div class="inline-block mt-2 px-4 py-1 rounded-full text-white text-sm rank-badge rank-${data.rank?.toLowerCase() || 'bronze'}">${data.rank || 'Bronze'}</div>
-                </div>
-                <div class="ios-card p-4 space-y-3">
-                    <div class="flex justify-between">
-                        <span class="text-gray-500">Total XP</span>
-                        <span class="font-bold">${data.xp || 0} XP</span>
-                    </div>
-                    <div class="progress-bar"><div class="progress-fill" style="width: ${(data.xp || 0) % 100}%"></div></div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-500">Total Deposited</span>
-                        <span class="font-bold text-blue-500">₹${data.totalDeposited || 0}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-500">Total Winnings</span>
-                        <span class="font-bold text-yellow-500">₹${data.totalWinnings || 0}</span>
-                    </div>
-                    <button onclick="auth.signOut()" class="w-full bg-red-500 text-white py-3 rounded-xl font-semibold mt-3">Logout</button>
-                </div>
-            `;
         }
         
         function loadTab(tab) {
@@ -854,27 +933,14 @@
             btn.onclick = () => loadTab(btn.dataset.tab);
         });
         
-        // Notification bell
         document.getElementById('notificationBell').onclick = () => {
             document.getElementById('notificationSheet').classList.add('active');
             document.getElementById('notificationsList').innerHTML = `
                 <div class="ios-card p-3">🎉 Welcome to Hamro Esports!</div>
-                <div class="ios-card p-3">💰 Deposit money to start playing tournaments</div>
+                <div class="ios-card p-3">💰 Add money to start playing</div>
+                <div class="ios-card p-3">🏆 Tournaments coming soon!</div>
             `;
         };
-        
-        // Support and report forms
-        document.getElementById('ticketForm')?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            showToast('Ticket submitted successfully');
-            closeSheet();
-        });
-        
-        document.getElementById('reportForm')?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            showToast('Report submitted to admins');
-            closeSheet();
-        });
     </script>
 </body>
 </html>
