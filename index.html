@@ -120,6 +120,17 @@
       justify-content: center;
     }
     .modal.active { display: flex; }
+    
+    .warning-text {
+      font-size: 12px;
+      color: #FF9500;
+      text-align: center;
+      margin-top: 8px;
+      font-weight: 500;
+    }
+    body.dark .warning-text {
+      color: #FFA559;
+    }
   </style>
 </head>
 
@@ -262,7 +273,12 @@
         </div>
 
         <div class="bg-red-50 border border-red-200 rounded-xl p-3">
-          <p class="text-xs text-red-600">⚠️ Min: ₹100 | Processing: 24-48 hours</p>
+          <p class="text-xs text-red-600">⚠️ Min: ₹50 | Processing: 5-7 hours</p>
+        </div>
+        
+        <!-- New warning text -->
+        <div class="warning-text">
+          ⚠️ Only winnings can be withdrawn
         </div>
 
         <button type="submit" class="ios-btn bg-[#FF9500] text-white w-full py-3 font-semibold">Request Withdrawal</button>
@@ -280,8 +296,8 @@
       <div class="space-y-3 text-sm">
         <p><strong>1. Eligibility</strong><br>Users must be 18+ years old to participate in tournaments.</p>
         <p><strong>2. Fair Play</strong><br>Any form of cheating, hacking, or unfair gameplay will result in immediate ban and forfeiture of winnings.</p>
-        <p><strong>3. Payments</strong><br>All entry fees are non-refundable. Winnings will be credited within 24-48 hours after tournament completion.</p>
-        <p><strong>4. Withdrawals</strong><br>Minimum withdrawal amount is ₹100. Processing time is 24-48 hours.</p>
+        <p><strong>3. Payments</strong><br>All entry fees are non-refundable. Winnings will be credited within 5-7 hours after tournament completion.</p>
+        <p><strong>4. Withdrawals</strong><br>Minimum withdrawal amount is ₹50. Only winnings can be withdrawn. Processing time is 5-7 hours.</p>
         <p><strong>5. Account Security</strong><br>Users are responsible for their account security. Multiple accounts are strictly prohibited.</p>
         <p><strong>6. Disputes</strong><br>All disputes will be resolved by the admin team. Decision of admin is final.</p>
         <p><strong>7. FF UID & IGN</strong><br>Free Fire UID and IGN cannot be changed once saved. Ensure accuracy before saving.</p>
@@ -319,8 +335,8 @@
       <div id="announcementContent" class="space-y-4">
         <div class="border-l-4 border-blue-500 pl-3 py-2">
           <p class="font-bold">💰 Withdrawal Update</p>
-          <p class="text-sm text-gray-600 dark:text-gray-400">Withdrawals are processed within 24-48 hours. Minimum withdrawal amount is ₹100.</p>
-          <p class="text-xs text-gray-400 mt-1">Updated: March 25, 2024</p>
+          <p class="text-sm text-gray-600 dark:text-gray-400">Withdrawals are processed within 5-7 hours. Minimum withdrawal amount is ₹50. Only winnings can be withdrawn.</p>
+          <p class="text-xs text-gray-400 mt-1">Updated: March 27, 2024</p>
         </div>
         <div class="border-l-4 border-green-500 pl-3 py-2">
           <p class="font-bold">🏆 New Tournament Alert!</p>
@@ -356,7 +372,7 @@
     // =========================
     // Firebase Config (EDIT - REPLACE WITH YOUR CONFIG)
     // =========================
-   const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyAPEWF1t1YKFG2-hrzY7IWBaumM4xyLwOs",
   authDomain: "hamro-tournament-09.firebaseapp.com",
   databaseURL: "https://hamro-tournament-09-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -365,7 +381,6 @@
   messagingSenderId: "167377472023",
   appId: "1:167377472023:web:ef825e192f564c5ccdea52"
 };
-
 
     // Init Firebase
     firebase.initializeApp(firebaseConfig);
@@ -432,7 +447,6 @@
       const walletSpan = document.getElementById('wallet-badge');
       if (walletSpan) walletSpan.textContent = `₹${data.wallet || 0}`;
       
-      // Update email display in header
       const emailDisplay = document.getElementById('userEmailDisplay');
       if (emailDisplay && currentUser.email) {
         emailDisplay.textContent = currentUser.email.split('@')[0];
@@ -460,7 +474,7 @@
             uid: user.uid,
             email: user.email,
             username: (user.email.split('@')[0] || 'user'),
-            wallet: 100,
+            wallet: 10, // Changed to ₹10 welcome bonus
             esewaId: '',
             ffUid: '',
             ffIgn: '',
@@ -476,13 +490,13 @@
 
           await db.collection('transactions').add({
             userId: user.uid,
-            amount: 100,
+            amount: 10, // Changed to ₹10 welcome bonus
             type: 'credit',
             description: 'Welcome Bonus',
             status: 'completed',
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
-          showToast('Welcome! ₹100 bonus added');
+          showToast('Welcome! ₹10 bonus added');
         }
         await updateWalletDisplay();
         showMainApp();
@@ -534,7 +548,7 @@
             uid: cred.user.uid,
             email: email,
             username: username || (email.split('@')[0] || 'user'),
-            wallet: 100,
+            wallet: 10, // Changed to ₹10 welcome bonus
             esewaId: '',
             ffUid: '',
             ffIgn: '',
@@ -549,13 +563,13 @@
           });
           await db.collection('transactions').add({
             userId: cred.user.uid,
-            amount: 100,
+            amount: 10, // Changed to ₹10 welcome bonus
             type: 'credit',
             description: 'Welcome Bonus',
             status: 'completed',
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
-          showToast('Account created! ₹100 bonus');
+          showToast('Account created! ₹10 bonus');
         } catch (error) {
           showToast(error.message, 'error');
         }
@@ -607,7 +621,7 @@
       if (!currentUser) return;
       const amount = parseInt(document.getElementById('withdrawAmount').value, 10);
       let esewaId = document.getElementById('withdrawEsewa').value.trim();
-      if (!amount || amount < 100) { showToast('Min withdrawal ₹100', 'error'); return; }
+      if (!amount || amount < 50) { showToast('Min withdrawal ₹50', 'error'); return; }
       if (!esewaId) { showToast('Enter eSewa ID', 'error'); return; }
       esewaId = esewaId.replace('@esewa', '');
       if (!/^\d{10}$/.test(esewaId)) { showToast('Invalid eSewa ID! Must be 10 digits', 'error'); return; }
@@ -665,13 +679,12 @@
       loadProfile();
     };
 
-    // Update Free Fire IGN (In-Game Name - One-time only, accepts special characters)
+    // Update Free Fire IGN
     window.updateFFIgn = async () => {
       const ffIgnInput = document.getElementById('ffIgnInput');
       if (!ffIgnInput) return;
       const ffIgn = ffIgnInput.value.trim();
       if (!ffIgn) { showToast('Please enter Free Fire IGN', 'error'); return; }
-      // Allow letters, numbers, spaces, and special characters
       if (ffIgn.length < 2 || ffIgn.length > 20) {
         showToast('IGN must be between 2-20 characters', 'error');
         return;
@@ -726,7 +739,7 @@
     }
 
     // =========================
-    // Wallet (No Quick Add Money)
+    // Wallet
     // =========================
     async function loadWallet(forceSpinner = false) {
       if (!currentUser) return;
@@ -767,7 +780,13 @@
             <div class="ios-card p-3 text-center"><div class="text-xs text-gray-500">Deposited</div><div class="text-2xl font-bold text-blue-500">₹${data.totalDeposited || depositedCompleted || 0}</div></div>
             <div class="ios-card p-3 text-center"><div class="text-xs text-gray-500">Winnings</div><div class="text-2xl font-bold text-yellow-500">₹${data.totalWinnings || winningsCompleted || 0}</div></div>
           </div>
-          <div class="grid grid-cols-2 gap-3 mb-4"><button onclick="document.getElementById('depositSheet').classList.add('active');" class="bg-[#34C759] text-white py-3 rounded-xl font-semibold">💰 Deposit</button><button onclick="document.getElementById('withdrawSheet').classList.add('active');" class="bg-[#FF9500] text-white py-3 rounded-xl font-semibold">💸 Withdraw</button></div>
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <button onclick="document.getElementById('depositSheet').classList.add('active');" class="bg-[#34C759] text-white py-3 rounded-xl font-semibold">💰 Deposit</button>
+            <button onclick="document.getElementById('withdrawSheet').classList.add('active');" class="bg-[#FF9500] text-white py-3 rounded-xl font-semibold">💸 Withdraw</button>
+          </div>
+          <div class="warning-text text-center mb-3">
+            ⚠️ Only winnings can be withdrawn
+          </div>
           <div class="ios-card p-4"><h3 class="font-bold mb-3">📜 Transaction History</h3>${transactionsHtml}</div>
         `;
         setWhatsappLink(data.username);
@@ -776,15 +795,22 @@
     }
 
     // =========================
-    // Home Tab
+    // Home Tab (Removed wallet, matches, wins cards)
     // =========================
     async function loadHome() {
       const userDoc = await db.collection('users').doc(currentUser.uid).get();
       const data = userDoc.data() || {};
       document.getElementById('content-area').innerHTML = `
-        <div class="bg-gradient-to-r from-[#007AFF] to-[#AF52DE] rounded-2xl p-4 mb-4 text-white"><h3 class="font-bold text-lg">Welcome, ${data.username || 'User'}!</h3><p class="text-sm opacity-90">Ready to play?</p></div>
-        <div class="grid grid-cols-3 gap-3 mb-4"><div class="ios-card p-3 text-center"><div class="text-xl font-bold text-green-500">₹${data.wallet || 0}</div><div class="text-xs">Wallet</div></div><div class="ios-card p-3 text-center"><div class="text-xl font-bold text-blue-500">${data.totalMatches || 0}</div><div class="text-xs">Matches</div></div><div class="ios-card p-3 text-center"><div class="text-xl font-bold text-yellow-500">${data.totalWins || 0}</div><div class="text-xs">Wins</div></div></div>
-        <div class="ios-card p-6 text-center"><div class="text-4xl mb-3">🎯</div><h3 class="font-bold text-lg">Tournaments Coming Soon!</h3><button onclick="loadTab('wallet')" class="mt-4 ios-btn ios-btn-primary px-6 py-2">Add Funds</button></div>
+        <div class="bg-gradient-to-r from-[#007AFF] to-[#AF52DE] rounded-2xl p-4 mb-4 text-white">
+          <h3 class="font-bold text-lg">Welcome, ${data.username || 'User'}!</h3>
+          <p class="text-sm opacity-90">Ready to play?</p>
+        </div>
+        
+        <div class="ios-card p-6 text-center">
+          <div class="text-4xl mb-3">🎯</div>
+          <h3 class="font-bold text-lg">Tournaments Coming Soon!</h3>
+          <button onclick="loadTab('wallet')" class="mt-4 ios-btn ios-btn-primary px-6 py-2">Add Funds</button>
+        </div>
       `;
     }
 
@@ -807,7 +833,7 @@
     }
 
     // =========================
-    // Profile Tab (Email displayed at top above member joined date)
+    // Profile Tab
     // =========================
     async function loadProfile() {
       const userDoc = await db.collection('users').doc(currentUser.uid).get();
@@ -828,10 +854,7 @@
             ${(data.username || currentUser.email?.charAt(0) || 'U').toUpperCase()}
           </div>
           <h2 class="text-2xl font-bold dark:text-white">${data.username || 'Player'}</h2>
-          
-          <!-- Email displayed here - at top of profile section -->
           <p class="text-gray-500 text-sm mt-1">${currentUser.email}</p>
-          
           <div class="flex justify-center gap-2 mt-2">
             <span class="badge badge-info">📅 Member since ${joinedDate}</span>
           </div>
@@ -860,7 +883,7 @@
           <!-- Free Fire UID -->
           <div class="mb-3"><label class="text-sm text-gray-500 block mb-1">🎮 Free Fire UID ${isUidLocked ? '(Locked - Cannot Change)' : '(Can be set once)'}</label><div class="flex gap-2"><input type="text" id="ffUidInput" value="${existingUid}" placeholder="Enter 9-12 digit UID" class="ios-input flex-1 ${isUidLocked && existingUid ? 'disabled-input' : ''}" ${isUidLocked && existingUid ? 'disabled' : ''} maxlength="12">${!isUidLocked || !existingUid ? `<button onclick="updateFFUid()" class="ios-btn ios-btn-primary px-4">Save UID</button>` : ''}</div>${isUidLocked && existingUid ? '<p class="text-xs text-green-500 mt-1">✓ UID saved and locked (cannot be changed)</p>' : '<p class="text-xs text-orange-500 mt-1">⚠️ UID can only be set once. Verify before saving!</p>'}</div>
           
-          <!-- Free Fire IGN (In-Game Name) - Accepts special characters -->
+          <!-- Free Fire IGN -->
           <div class="mb-3"><label class="text-sm text-gray-500 block mb-1">🎮 Free Fire IGN ${isIgnLocked ? '(Locked - Cannot Change)' : '(Can be set once)'}</label><div class="flex gap-2"><input type="text" id="ffIgnInput" value="${existingIgn}" placeholder="Enter IGN (2-20 characters)" class="ios-input flex-1 ${isIgnLocked && existingIgn ? 'disabled-input' : ''}" ${isIgnLocked && existingIgn ? 'disabled' : ''} maxlength="20">${!isIgnLocked || !existingIgn ? `<button onclick="updateFFIgn()" class="ios-btn ios-btn-primary px-4">Save IGN</button>` : ''}</div>${isIgnLocked && existingIgn ? '<p class="text-xs text-green-500 mt-1">✓ IGN saved and locked (cannot be changed)</p>' : '<p class="text-xs text-orange-500 mt-1">⚠️ IGN can only be set once. Verify before saving!</p>'}</div>
           
           <!-- eSewa ID -->
@@ -872,7 +895,7 @@
         
         <div class="ios-card p-4 mb-4"><div class="accordion" onclick="toggleAccordion('aboutContent')"><div class="flex justify-between items-center py-2"><h3 class="font-bold dark:text-white">ℹ️ About Us</h3><span class="text-xl">▼</span></div></div><div id="aboutContent" class="accordion-content text-sm text-gray-600 dark:text-gray-400"><p>Hamro Tournament is Nepal's premier esports platform for Free Fire and BGMI tournaments.</p><button onclick="openAboutModal()" class="text-blue-500 text-sm mt-2">Read More →</button></div></div>
         
-        <div class="ios-card p-4 mb-4"><div class="accordion" onclick="toggleAccordion('announcementContentInner')"><div class="flex justify-between items-center py-2"><h3 class="font-bold dark:text-white">📢 Announcements</h3><span class="text-xl">▼</span></div></div><div id="announcementContentInner" class="accordion-content space-y-2"><div class="border-l-4 border-blue-500 pl-3 py-1"><p class="text-sm font-medium">💰 Withdrawal Update</p><p class="text-xs text-gray-500">Processing time: 24-48 hours</p></div><div class="border-l-4 border-green-500 pl-3 py-1"><p class="text-sm font-medium">🏆 New Tournament!</p><p class="text-xs text-gray-500">Free Fire Championship - ₹50,000 Prize Pool</p></div><button onclick="openAnnouncementModal()" class="text-blue-500 text-sm mt-1">View All →</button></div></div>
+        <div class="ios-card p-4 mb-4"><div class="accordion" onclick="toggleAccordion('announcementContentInner')"><div class="flex justify-between items-center py-2"><h3 class="font-bold dark:text-white">📢 Announcements</h3><span class="text-xl">▼</span></div></div><div id="announcementContentInner" class="accordion-content space-y-2"><div class="border-l-4 border-blue-500 pl-3 py-1"><p class="text-sm font-medium">💰 Withdrawal Update</p><p class="text-xs text-gray-500">Processing: 5-7 hours | Min: ₹50 | Only winnings can be withdrawn</p></div><div class="border-l-4 border-green-500 pl-3 py-1"><p class="text-sm font-medium">🏆 New Tournament!</p><p class="text-xs text-gray-500">Free Fire Championship - ₹50,000 Prize Pool</p></div><button onclick="openAnnouncementModal()" class="text-blue-500 text-sm mt-1">View All →</button></div></div>
         
         <div class="ios-card p-4 mb-4"><div class="accordion" onclick="toggleAccordion('tutorialContent')"><div class="flex justify-between items-center py-2"><h3 class="font-bold dark:text-white">📺 App Tutorial</h3><span class="text-xl">▼</span></div></div><div id="tutorialContent" class="accordion-content"><p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Watch our tutorial to learn how to use Hamro Tournament:</p><button onclick="openTutorialModal()" class="ios-btn ios-btn-primary w-full py-2">Watch Tutorial →</button></div></div>
         
