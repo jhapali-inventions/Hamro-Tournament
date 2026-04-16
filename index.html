@@ -184,9 +184,7 @@
           <div id="wallet-badge" class="bg-[#34C759] px-3 py-1 rounded-full text-white text-sm font-semibold">₹0</div>
           <div class="flex items-center gap-1">
             <div id="userEmailDisplay" class="text-sm text-gray-600 dark:text-gray-300 hidden md:block"></div>
-            <button onclick="openContactSheet()" class="w-8 h-8 rounded-full bg-white dark:bg-[#1c1c1e] shadow-md flex items-center justify-center">📞</button>
             <button id="darkModeToggle" class="w-8 h-8 rounded-full bg-white dark:bg-[#1c1c1e] shadow-md flex items-center justify-center">🌙</button>
-            <button onclick="logout()" class="bg-red-500 text-white px-3 py-1 rounded-full text-sm">Logout</button>
           </div>
         </div>
       </div>
@@ -227,7 +225,7 @@
     </div>
   </div>
 
-  <!-- Contact Sheet (NEW) -->
+  <!-- Contact Sheet -->
   <div id="contactSheet" class="bottom-sheet">
     <div class="p-6">
       <div class="flex justify-between items-center mb-4">
@@ -452,6 +450,7 @@ const firebaseConfig = {
   appId: "1:167377472023:web:ef825e192f564c5ccdea52"
 };
 
+
     // Init Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
@@ -480,7 +479,7 @@ const firebaseConfig = {
     function setDepositAmount(amt) { document.getElementById('depositAmount').value = amt; }
     function setWithdrawAmount(amt) { document.getElementById('withdrawAmount').value = amt; }
 
-    // NEW: Contact Sheet Controls
+    // Contact Sheet Controls
     function openContactSheet() { document.getElementById('contactSheet').classList.add('active'); }
     function closeContactSheet() { document.getElementById('contactSheet').classList.remove('active'); }
 
@@ -537,7 +536,7 @@ const firebaseConfig = {
     }
 
     // =========================
-    // TOURNAMENTS FUNCTIONS (NEW)
+    // TOURNAMENTS FUNCTIONS
     // =========================
     async function loadTournaments() {
       const content = document.getElementById('content-area');
@@ -559,7 +558,6 @@ const firebaseConfig = {
           return;
         }
         
-        // Get user's joined tournaments
         let joinedTournamentIds = new Set();
         try {
           const userRegistrations = await db.collection('tournamentRegistrations')
@@ -662,7 +660,6 @@ const firebaseConfig = {
           return;
         }
         
-        // Check if already registered
         const existingReg = await db.collection('tournamentRegistrations')
           .where('tournamentId', '==', selectedTournament.id)
           .where('userId', '==', currentUser.uid)
@@ -674,12 +671,10 @@ const firebaseConfig = {
           return;
         }
         
-        // Deduct entry fee
         await db.collection('users').doc(currentUser.uid).update({
           wallet: firebase.firestore.FieldValue.increment(-selectedTournament.entryFee)
         });
         
-        // Update tournament player count
         const tournamentRef = db.collection('tournaments').doc(selectedTournament.id);
         const tournamentDoc = await tournamentRef.get();
         const currentPlayers = tournamentDoc.data()?.currentPlayers || 0;
@@ -687,7 +682,6 @@ const firebaseConfig = {
           currentPlayers: currentPlayers + 1
         });
         
-        // Create registration record
         await db.collection('tournamentRegistrations').add({
           tournamentId: selectedTournament.id,
           tournamentTitle: selectedTournament.title,
@@ -698,7 +692,6 @@ const firebaseConfig = {
           entryFee: selectedTournament.entryFee
         });
         
-        // Create transaction record
         await db.collection('transactions').add({
           userId: currentUser.uid,
           amount: selectedTournament.entryFee,
@@ -1092,12 +1085,11 @@ const firebaseConfig = {
       `;
     }
 
-    // Leaderboard Tab (UPDATED: Shows ONLY winnings)
+    // Leaderboard Tab
     async function loadLeaderboard() {
       const content = document.getElementById('content-area');
       content.innerHTML = `<div class="ios-card p-6 text-center"><div class="spinner mx-auto mb-3"></div><div>Loading leaderboard...</div></div>`;
       try {
-        // Query users sorted by totalWinnings only
         const usersSnap = await db.collection('users')
           .orderBy('totalWinnings', 'desc')
           .limit(15)
@@ -1151,7 +1143,7 @@ const firebaseConfig = {
     }
 
     // =========================
-    // Profile Tab
+    // Profile Tab (UPDATED)
     // =========================
     async function loadProfile() {
       const userDoc = await db.collection('users').doc(currentUser.uid).get();
@@ -1209,6 +1201,13 @@ const firebaseConfig = {
         <div class="ios-card p-4 mb-4"><div class="accordion" onclick="toggleAccordion('announcementContentInner')"><div class="flex justify-between items-center py-2"><h3 class="font-bold dark:text-white">📢 Announcements</h3><span class="text-xl">▼</span></div></div><div id="announcementContentInner" class="accordion-content space-y-2"><div class="border-l-4 border-blue-500 pl-3 py-1"><p class="text-sm font-medium">💰 Withdrawal Update</p><p class="text-xs text-gray-500">Processing: 5-7 hours | Min: ₹50 | Only winnings can be withdrawn</p></div><div class="border-l-4 border-green-500 pl-3 py-1"><p class="text-sm font-medium">🏆 New Tournament!</p><p class="text-xs text-gray-500">Free Fire Championship - ₹50,000 Prize Pool</p></div><button onclick="openAnnouncementModal()" class="text-blue-500 text-sm mt-1">View All →</button></div></div>
         
         <div class="ios-card p-4 mb-4"><div class="accordion" onclick="toggleAccordion('tutorialContent')"><div class="flex justify-between items-center py-2"><h3 class="font-bold dark:text-white">📺 App Tutorial</h3><span class="text-xl">▼</span></div></div><div id="tutorialContent" class="accordion-content"><p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Watch our tutorial to learn how to use Hamro Tournament:</p><button onclick="openTutorialModal()" class="ios-btn ios-btn-primary w-full py-2">Watch Tutorial →</button></div></div>
+
+        <!-- Contact Us Button (Added Here) -->
+        <div class="ios-card p-4 mb-4">
+          <button onclick="openContactSheet()" class="ios-btn w-full py-3 bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white font-semibold text-lg flex items-center justify-center gap-2">
+            📞 Contact Us / Support
+          </button>
+        </div>
         
         <button onclick="logout()" class="w-full bg-red-500 text-white py-3 rounded-xl font-semibold">Logout</button>
       `;
@@ -1238,7 +1237,7 @@ const firebaseConfig = {
     document.addEventListener('click', (e) => {
       if (e.target === document.getElementById('depositSheet')) closeDepositSheet();
       if (e.target === document.getElementById('withdrawSheet')) closeWithdrawSheet();
-      if (e.target === document.getElementById('contactSheet')) closeContactSheet(); // NEW
+      if (e.target === document.getElementById('contactSheet')) closeContactSheet();
     });
 
     // Make functions global
@@ -1262,7 +1261,6 @@ const firebaseConfig = {
     window.toggleAccordion = toggleAccordion;
     window.logout = logout;
     window.loadTab = loadTab;
-    // NEW: Contact sheet exports
     window.openContactSheet = openContactSheet;
     window.closeContactSheet = closeContactSheet;
   </script>
