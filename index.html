@@ -184,6 +184,7 @@
           <div id="wallet-badge" class="bg-[#34C759] px-3 py-1 rounded-full text-white text-sm font-semibold">₹0</div>
           <div class="flex items-center gap-1">
             <div id="userEmailDisplay" class="text-sm text-gray-600 dark:text-gray-300 hidden md:block"></div>
+            <button onclick="openContactSheet()" class="w-8 h-8 rounded-full bg-white dark:bg-[#1c1c1e] shadow-md flex items-center justify-center">📞</button>
             <button id="darkModeToggle" class="w-8 h-8 rounded-full bg-white dark:bg-[#1c1c1e] shadow-md flex items-center justify-center">🌙</button>
             <button onclick="logout()" class="bg-red-500 text-white px-3 py-1 rounded-full text-sm">Logout</button>
           </div>
@@ -223,6 +224,28 @@
       <button class="nav-btn flex flex-col items-center gap-1 text-[#8e8e93]" data-tab="play"><span class="text-xl">📊</span><span class="text-xs">Leaderboard</span></button>
       <button class="nav-btn flex flex-col items-center gap-1 text-[#8e8e93]" data-tab="wallet"><span class="text-xl">💰</span><span class="text-xs">Wallet</span></button>
       <button class="nav-btn flex flex-col items-center gap-1 text-[#8e8e93]" data-tab="profile"><span class="text-xl">👤</span><span class="text-xs">Profile</span></button>
+    </div>
+  </div>
+
+  <!-- Contact Sheet (NEW) -->
+  <div id="contactSheet" class="bottom-sheet">
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold dark:text-white">📞 Contact Support</h3>
+        <button onclick="closeContactSheet()" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800">✕</button>
+      </div>
+      <div class="space-y-3">
+        <a href="https://wa.me/9779800000000" target="_blank" class="flex items-center gap-3 bg-[#25D366] text-white p-4 rounded-xl font-semibold hover:opacity-90 transition">
+          <span class="text-2xl">📱</span> WhatsApp Support
+        </a>
+        <a href="https://instagram.com/your_handle" target="_blank" class="flex items-center gap-3 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 text-white p-4 rounded-xl font-semibold hover:opacity-90 transition">
+          <span class="text-2xl">📸</span> Follow on Instagram
+        </a>
+        <a href="https://facebook.com/your_page" target="_blank" class="flex items-center gap-3 bg-[#1877F2] text-white p-4 rounded-xl font-semibold hover:opacity-90 transition">
+          <span class="text-2xl">👍</span> Join Facebook Page
+        </a>
+      </div>
+      <p class="text-xs text-center text-gray-500 mt-4">⏰ Support available: 10 AM - 10 PM NST</p>
     </div>
   </div>
 
@@ -456,6 +479,10 @@ const firebaseConfig = {
     function closeJoinModal() { document.getElementById('joinTournamentModal').classList.remove('active'); }
     function setDepositAmount(amt) { document.getElementById('depositAmount').value = amt; }
     function setWithdrawAmount(amt) { document.getElementById('withdrawAmount').value = amt; }
+
+    // NEW: Contact Sheet Controls
+    function openContactSheet() { document.getElementById('contactSheet').classList.add('active'); }
+    function closeContactSheet() { document.getElementById('contactSheet').classList.remove('active'); }
 
     function copyEsewaId() {
       navigator.clipboard?.writeText('9841234567');
@@ -1065,17 +1092,62 @@ const firebaseConfig = {
       `;
     }
 
-    // Leaderboard Tab
+    // Leaderboard Tab (UPDATED: Shows ONLY winnings)
     async function loadLeaderboard() {
-      const usersSnap = await db.collection('users').orderBy('wallet', 'desc').limit(10).get();
-      let html = `<h2 class="text-xl font-bold mb-3">🏆 Top Players</h2>`;
-      let rank = 1;
-      usersSnap.forEach(doc => {
-        const u = doc.data() || {};
-        html += `<div class="ios-card p-3 mb-2 flex justify-between"><div><span class="font-bold">${rank}.</span> ${u.username || 'User'}</div><div class="text-green-500 font-bold">₹${u.wallet || 0}</div></div>`;
-        rank++;
-      });
-      document.getElementById('content-area').innerHTML = html;
+      const content = document.getElementById('content-area');
+      content.innerHTML = `<div class="ios-card p-6 text-center"><div class="spinner mx-auto mb-3"></div><div>Loading leaderboard...</div></div>`;
+      try {
+        // Query users sorted by totalWinnings only
+        const usersSnap = await db.collection('users')
+          .orderBy('totalWinnings', 'desc')
+          .limit(15)
+          .get();
+        
+        let html = `
+          <div class="text-center mb-4">
+            <h2 class="text-xl font-bold">🏆 Top Winners</h2>
+            <p class="text-xs text-gray-500 mt-1">Ranked by total tournament winnings</p>
+          </div>
+        `;
+        let rank = 1;
+        let hasWinners = false;
+        
+        usersSnap.forEach(doc => {
+          const u = doc.data() || {};
+          const winnings = u.totalWinnings || 0;
+          
+          if (winnings > 0) {
+            hasWinners = true;
+            const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+            html += `
+              <div class="ios-card p-3 mb-2 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                  <span class="text-2xl">${medal}</span>
+                  <div>
+                    <div class="font-bold">${u.username || 'Player'}</div>
+                    <div class="text-xs text-gray-500">UID: ${u.ffUid || 'N/A'}</div>
+                  </div>
+                </div>
+                <div class="text-green-500 font-bold">₹${winnings}</div>
+              </div>`;
+            rank++;
+          }
+        });
+        
+        if (!hasWinners) {
+          html += `<div class="text-center py-8 text-gray-500">No winners yet. Join a tournament to get on the board! 🎮</div>`;
+        }
+        
+        content.innerHTML = html;
+      } catch (err) {
+        content.innerHTML = `
+          <div class="ios-card p-6 text-center">
+            <div class="text-red-500 mb-2">❌ Error loading leaderboard</div>
+            <p class="text-sm text-gray-500">${err.message}</p>
+            <button onclick="loadLeaderboard()" class="ios-btn ios-btn-primary mt-3">Retry</button>
+          </div>
+        `;
+      }
     }
 
     // =========================
@@ -1166,6 +1238,7 @@ const firebaseConfig = {
     document.addEventListener('click', (e) => {
       if (e.target === document.getElementById('depositSheet')) closeDepositSheet();
       if (e.target === document.getElementById('withdrawSheet')) closeWithdrawSheet();
+      if (e.target === document.getElementById('contactSheet')) closeContactSheet(); // NEW
     });
 
     // Make functions global
@@ -1189,6 +1262,9 @@ const firebaseConfig = {
     window.toggleAccordion = toggleAccordion;
     window.logout = logout;
     window.loadTab = loadTab;
+    // NEW: Contact sheet exports
+    window.openContactSheet = openContactSheet;
+    window.closeContactSheet = closeContactSheet;
   </script>
 </body>
 </html>
