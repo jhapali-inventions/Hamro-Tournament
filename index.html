@@ -538,7 +538,7 @@ const firebaseConfig = {
     // =========================
     // TOURNAMENTS FUNCTIONS
     // =========================
-    async function loadTournaments() {
+        async function loadTournaments() {
       const content = document.getElementById('content-area');
       content.innerHTML = `<div class="ios-card p-6 text-center"><div class="spinner mx-auto mb-3"></div><div>Loading tournaments...</div></div>`;
       
@@ -583,27 +583,38 @@ const firebaseConfig = {
             } catch(e) { console.error("Date error:", e); }
           }
           
+          // ✅ BANNER ADDED HERE
           html += `
-            <div class="ios-card p-4 tournament-card">
-              <div class="flex justify-between items-start mb-2">
-                <div>
-                  <h3 class="font-bold text-lg">${t.title || 'Unnamed Tournament'}</h3>
-                  <p class="text-xs text-gray-500">${t.gameType || 'Free Fire'}</p>
+            <div class="ios-card p-0 tournament-card overflow-hidden mb-4">
+              ${t.bannerUrl ? `
+                <div class="w-full h-40 bg-gray-100 dark:bg-gray-800 relative">
+                  <img src="${t.bannerUrl}" alt="${t.title}" class="w-full h-full object-cover" loading="lazy" 
+                       onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                  <div class="hidden absolute inset-0 items-center justify-center text-gray-400 text-sm">Banner failed to load</div>
                 </div>
-                <span class="status-badge status-upcoming">Upcoming</span>
-              </div>
+              ` : ''}
               
-              <div class="grid grid-cols-2 gap-2 mb-3 text-sm">
-                <div>💰 Entry: ₹${t.entryFee || 0}</div>
-                <div>🏆 Prize: ₹${t.prizePool || 0}</div>
-                <div>👥 ${t.currentPlayers || 0}/${t.maxPlayers || 0} players</div>
-                <div>📅 ${dateStr}</div>
+              <div class="p-4">
+                <div class="flex justify-between items-start mb-2">
+                  <div>
+                    <h3 class="font-bold text-lg">${t.title || 'Unnamed Tournament'}</h3>
+                    <p class="text-xs text-gray-500">${t.gameType || 'Free Fire'}</p>
+                  </div>
+                  <span class="status-badge status-upcoming">Upcoming</span>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-2 mb-3 text-sm">
+                  <div>💰 Entry: ₹${t.entryFee || 0}</div>
+                  <div>🏆 Prize: ₹${t.prizePool || 0}</div>
+                  <div>👥 ${t.currentPlayers || 0}/${t.maxPlayers || 0} players</div>
+                  <div>📅 ${dateStr}</div>
+                </div>
+                
+                ${isJoined ? 
+                  `<div class="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-center py-2 rounded-xl text-sm font-semibold">✓ Already Joined</div>` :
+                  `<button onclick="openJoinModal('${tournamentId}', '${t.title.replace(/'/g, "\\'")}', ${t.entryFee || 0})" class="ios-btn ios-btn-primary w-full py-2 text-sm">Join Tournament</button>`
+                }
               </div>
-              
-              ${isJoined ? 
-                `<div class="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-center py-2 rounded-xl text-sm font-semibold">✓ Already Joined</div>` :
-                `<button onclick="openJoinModal('${tournamentId}', '${t.title.replace(/'/g, "\\'")}', ${t.entryFee || 0})" class="ios-btn ios-btn-primary w-full py-2 text-sm">Join Tournament</button>`
-              }
             </div>
           `;
         }
